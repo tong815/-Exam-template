@@ -57,8 +57,16 @@
     return { type: "lines", lines: 4 };
   };
 
-  ET.normalizeBreakInside = function (value) {
-    return value === "avoid" ? "avoid" : "auto";
+  ET.normalizeBreakInside = function (value, questionType) {
+    if (
+      questionType === "multiple-choice" ||
+      questionType === "true-false" ||
+      questionType === "short-answer" ||
+      questionType === "matching"
+    ) {
+      return "avoid";
+    }
+    return value === "auto" ? "auto" : "avoid";
   };
 
   ET.createQuestion = function (overrides = {}) {
@@ -80,7 +88,7 @@
       attachments: ET.normalizeAttachments(overrides.attachments),
       rubricAllocation: ET.normalizeRubricAllocation(overrides.rubricAllocation),
       pageBreakBefore: overrides.pageBreakBefore ?? (isPageBreak ? true : false),
-      breakInside: ET.normalizeBreakInside(overrides.breakInside),
+      breakInside: ET.normalizeBreakInside(overrides.breakInside, type),
     };
   };
 
@@ -323,6 +331,7 @@
     if (Array.isArray(migrated.instructions)) data.instructions = migrated.instructions;
     if (migrated.rubric) data.rubric = migrated.rubric;
     if (migrated.settings) Object.assign(data.settings, migrated.settings);
+    if (migrated.formatting) data.formatting = migrated.formatting;
 
     if (Array.isArray(migrated.parts)) {
       data.parts = migrated.parts.map((p, i) => ET.normalizePart(p, i, data.parts[i]));
@@ -402,7 +411,7 @@
         attachments: raw.attachments,
         rubricAllocation: raw.rubricAllocation,
         pageBreakBefore: raw.pageBreakBefore !== false,
-        breakInside: ET.normalizeBreakInside(raw.breakInside),
+        breakInside: ET.normalizeBreakInside(raw.breakInside, "page-break"),
       });
     }
     return ET.createQuestion({
@@ -419,7 +428,7 @@
       attachments: ET.normalizeAttachments(raw.attachments),
       rubricAllocation: ET.normalizeRubricAllocation(raw.rubricAllocation),
       pageBreakBefore: !!raw.pageBreakBefore,
-      breakInside: ET.normalizeBreakInside(raw.breakInside),
+      breakInside: ET.normalizeBreakInside(raw.breakInside, type),
     });
   };
 
@@ -534,7 +543,7 @@
         options: ET.normalizeOptions(q.options),
         answerSpace: ET.normalizeAnswerSpace(q.answerSpace, q.type),
         pageBreakBefore: !!q.pageBreakBefore,
-        breakInside: ET.normalizeBreakInside(q.breakInside),
+        breakInside: ET.normalizeBreakInside(q.breakInside, q.type),
       }));
       const scorable = ET.getScorableQuestions(questions);
 

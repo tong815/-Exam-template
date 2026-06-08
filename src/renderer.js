@@ -54,7 +54,7 @@
       attachments: ET.normalizeAttachments(q?.attachments),
       rubricAllocation: ET.normalizeRubricAllocation(q?.rubricAllocation),
       pageBreakBefore: !!q?.pageBreakBefore,
-      breakInside: ET.normalizeBreakInside(q?.breakInside),
+      breakInside: ET.normalizeBreakInside(q?.breakInside, type),
     };
   };
 
@@ -119,6 +119,9 @@
     parts.push(`<p class="exam-end">— End of Examination — Good luck! / Bonne chance! —</p>`);
 
     rootEl.innerHTML = parts.join("\n");
+    if (typeof ET.scheduleQuestionPagination === "function") {
+      ET.scheduleQuestionPagination(rootEl);
+    }
   };
 
   ET.renderPrintChrome = function (meta) {
@@ -281,10 +284,13 @@
     }
 
     const beforeMarker = safe.pageBreakBefore ? ET.renderPageBreakMarker() : "";
-    const breakClass =
-      safe.breakInside === "avoid"
-        ? " question-block--avoid-break"
-        : " question-block--allow-split";
+    const keepWhole =
+      safe.type === "multiple-choice" ||
+      safe.type === "true-false" ||
+      safe.type === "short-answer" ||
+      safe.type === "matching" ||
+      safe.breakInside === "avoid";
+    const breakClass = keepWhole ? " question-block--avoid-break" : " question-block--allow-split";
 
     const attachmentsHtml = ET.renderAttachments(safe.attachments);
     const body = ET.renderQuestionBody(safe);

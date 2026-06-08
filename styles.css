@@ -589,7 +589,14 @@ html[data-paper="a4"] .exam-document {
 }
 
 .exam-section__keep-group {
-  /* Screen: visual grouping only; print rules below */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Screen-only: exam section keep group */
+.exam-section--keep-heading .exam-section__keep-group {
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .page-break-marker,
@@ -689,6 +696,8 @@ html[data-paper="a4"] .exam-document {
   margin-bottom: 1.1rem;
   padding-bottom: 0.85rem;
   border-bottom: 1px solid var(--color-border-light);
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .question-block--avoid-break {
@@ -701,6 +710,11 @@ html[data-paper="a4"] .exam-document {
   page-break-inside: auto;
 }
 
+.question-block--force-next-page {
+  break-before: page;
+  page-break-before: always;
+}
+
 .question-block:last-child {
   border-bottom: none;
 }
@@ -710,6 +724,8 @@ html[data-paper="a4"] .exam-document {
   align-items: baseline;
   gap: 0.35rem;
   margin-bottom: 0.45rem;
+  break-after: avoid;
+  page-break-after: avoid;
 }
 
 .question-block__number {
@@ -748,6 +764,8 @@ html[data-paper="a4"] .exam-document {
   list-style: none;
   margin: 0.35rem 0 0.5rem;
   padding: 0 0 0 1.25rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .options-list li {
@@ -763,6 +781,8 @@ html[data-paper="a4"] .exam-document {
 .explanation-line {
   margin: 0.4rem 0 0;
   font-size: 10pt;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .answer-line__label,
@@ -785,6 +805,8 @@ html[data-paper="a4"] .exam-document {
   border: 1px solid var(--color-border);
   background: #fafafa;
   padding: 0.5rem 0.65rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .solution-space__label {
