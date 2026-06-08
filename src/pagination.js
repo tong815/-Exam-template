@@ -1,153 +1,283 @@
 /**
- * Print pagination helpers — sequential page packing for question blocks.
+ * Deterministic exam preview pagination — explicit .exam-page containers.
  */
 (function (ET) {
   "use strict";
 
-  /** Set true in console: ExamToolkit.PAGINATION_DEBUG = true */
   ET.PAGINATION_DEBUG = ET.PAGINATION_DEBUG === true;
 
-  ET.getPrintPageUsableHeightPx = function () {
-    const paper = document.documentElement.dataset.paper || "letter";
-    const pxPerIn = 96;
-    const pxPerMm = pxPerIn / 25.4;
-
-    if (paper === "a4") {
-      const pageMm = 297;
-      const marginMm = 1.8 * 2;
-      return (pageMm - marginMm) * pxPerMm;
-    }
-
-    const pageIn = 11;
-    const marginIn = 0.7 * 2;
-    return (pageIn - marginIn) * pxPerIn;
-  };
-
-  ET.getOffsetInRoot = function (el, root) {
-    const rootRect = root.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
-    return {
-      top: elRect.top - rootRect.top + root.scrollTop,
-      bottom: elRect.bottom - rootRect.top + root.scrollTop,
-    };
-  };
-
-  ET.measureQuestionHeight = function (node) {
-    if (!node || node.nodeType !== 1) return 0;
-    const style = getComputedStyle(node);
-    const marginBottom = parseFloat(style.marginBottom) || 0;
-    return (node.offsetHeight || 0) + marginBottom;
-  };
-
-  ET.questionAllowsInternalSplit = function (block) {
-    const type = block.dataset.type || "";
-    if (
+  ET.isAtomicQuestionType = function (type) {
+    return (
       type === "multiple-choice" ||
       type === "true-false" ||
       type === "short-answer" ||
       type === "matching"
-    ) {
-      return false;
+    );
+  };
+
+  ET.isAtomicQuestion = function (q) {
+    const type = q?.type || "custom";
+    if (ET.isAtomicQuestionType(type)) return true;
+    return ET.normalizeBreakInside(q?.breakInside, type) === "avoid";
+  };
+
+  ET.createPaginationBlock = function (kind, html, options = {}) {
+    const el = document.createElement("div");
+    el.className = `pagination-block pagination-block--${kind}`;
+    el.dataset.blockKind = kind;
+    if (options.partId) el.dataset.partId = options.partId;
+    if (options.forceNewPage) el.dataset.forceNewPage = "true";
+    if (options.atomic) el.dataset.atomic = "true";
+    el.innerHTML = html;
+    return el;
+  };
+
+  ET.buildExamBlockElements = function (view) {
+    const safeView = {
+      meta: ET.safeMeta(view?.meta),
+      instructions: view?.instructions || [],
+      markDistribution: view?.markDistribution || [],
+      parts: (view?.parts || []).map(ET.safePart),
+      bonus: view?.bonus || { enabled: false },
+      settings: view?.settings || {},
+    };
+
+    const blocks = [];
+
+    blocks.push(
+      ET.createPaginationBlock("title", ET.renderTitleBlock(safeView.meta), { forceNewPage: false })
+    );
+
+    if (safeView.settings.showInstructions !== false) {
+      blocks.push(
+        ET.createPaginationBlock("instructions", ET.renderInstructions(safeView.instructions))
+      );
     }
-    return true;
-  };
 
-  ET.clearQuestionPagination = function (rootEl) {
-    if (!rootEl) return;
-    rootEl
-      .querySelectorAll(
-        ".question-block--force-next-page, .question-block--allow-internal-split"
-      )
-      .forEach((el) => {
-        el.classList.remove("question-block--force-next-page");
-        el.classList.remove("question-block--allow-internal-split");
+    if (safeView.settings.showMarkDistribution !== false) {
+      blocks.push(
+        ET.createPaginationBlock("marks", ET.renderMarkDistribution(safeView.markDistribution))
+      );
+    }
+
+    safeView.parts.forEach((part) => {
+      const safe = ET.safePart(part);
+      if (!safe.questions.length && !safe.title) return;
+
+      blocks.push(
+        ET.createPaginationBlock(
+          "part-intro",
+          `<section class="exam-section" data-part="${ET.escapeHtml(safe.id)}"><div class="exam-section__intro">${ET.renderPartIntro(safe)}</div></section>`,
+          { partId: safe.id, forceNewPage: !!safe.pageBreakBefore }
+        )
+      );
+
+      safe.questions.forEach((q, index) => {
+        const question = ET.safeQuestion(q, index);
+
+        if (question.type === "page-break") {
+          blocks.push(
+            ET.createPaginationBlock("page-break", ET.renderPageBreakBlock(question), {
+              partId: safe.id,
+            })
+          );
+          return;
+        }
+
+        if (question.pageBreakBefore) {
+          blocks.push(
+            ET.createPaginationBlock("page-break", ET.renderPageBreakMarker(), { partId: safe.id })
+          );
+        }
+
+        const questionHtml = ET.renderQuestion(q, index);
+        blocks.push(
+          ET.createPaginationBlock(
+            "question",
+            `<section class="exam-section" data-part="${ET.escapeHtml(safe.id)}">${questionHtml}</section>`,
+            {
+              partId: safe.id,
+              atomic: ET.isAtomicQuestion(q),
+            }
+          )
+        );
       });
-  };
-
-  ET.clearPaginationMeasureStyles = function (rootEl) {
-    if (!rootEl) return;
-    rootEl.querySelectorAll("[data-pagination-measure]").forEach((el) => {
-      el.style.marginTop = "";
-      delete el.dataset.paginationMeasure;
     });
+
+    if (safeView.bonus?.enabled) {
+      blocks.push(
+        ET.createPaginationBlock(
+          "part-intro",
+          `<section class="exam-section" data-part="bonus"><h2 class="exam-section__heading">Bonus Question (Optional)</h2></section>`,
+          { partId: "bonus", forceNewPage: true }
+        )
+      );
+
+      const bonusQ = ET.safeQuestion(
+        {
+          number: safeView.bonus.number || safeView.bonus.label || "B1",
+          marks: safeView.bonus.marks ?? "+___",
+          type: "problem-solving",
+          stem: safeView.bonus.stem,
+          answerSpace: safeView.bonus.answerSpace || { type: "lines", lines: 3 },
+          teacherNote: safeView.bonus.teacherNote,
+          answerKey: safeView.bonus.answerKey,
+        },
+        0
+      );
+
+      blocks.push(
+        ET.createPaginationBlock(
+          "question",
+          `<section class="exam-section" data-part="bonus">${ET.renderQuestion(bonusQ, 0)}</section>`,
+          { partId: "bonus", atomic: false }
+        )
+      );
+    }
+
+    blocks.push(
+      ET.createPaginationBlock(
+        "end",
+        `<p class="exam-end">— End of Examination — Good luck! / Bonne chance! —</p>`
+      )
+    );
+
+    return blocks;
   };
 
-  /**
-   * Pack questions sequentially. Each question is measured after prior breaks
-   * are applied; temporary margin-top simulates print reflow during measurement.
-   */
-  ET.applyQuestionPagination = function (rootEl) {
-    if (!rootEl) return;
+  ET.createExamPageElement = function () {
+    const page = document.createElement("div");
+    page.className = "exam-page";
+    page.dataset.examPage = "true";
+    return page;
+  };
 
-    ET.clearQuestionPagination(rootEl);
-    ET.clearPaginationMeasureStyles(rootEl);
+  ET.measurePageMaxScrollHeight = function (sandbox) {
+    const probe = ET.createExamPageElement();
+    sandbox.appendChild(probe);
+    const maxScrollHeight = probe.scrollHeight;
+    sandbox.removeChild(probe);
+    return maxScrollHeight;
+  };
 
-    const pageHeight = ET.getPrintPageUsableHeightPx();
-    if (!pageHeight || pageHeight <= 0) return;
+  ET.pageHasContent = function (pageEl) {
+    return pageEl.childNodes.length > 0;
+  };
 
-    rootEl.classList.add("is-measuring-print");
-    rootEl.offsetHeight;
+  ET.flushPage = function (pages, pageEl) {
+    if (ET.pageHasContent(pageEl)) {
+      pages.push(pageEl);
+    }
+  };
 
-    try {
-      const questions = [...rootEl.querySelectorAll('.question-block:not([data-type="page-break"])')];
+  ET.startNewPage = function (sandbox) {
+    const pageEl = ET.createExamPageElement();
+    sandbox.appendChild(pageEl);
+    return pageEl;
+  };
 
-      for (const block of questions) {
-        const questionHeight = ET.measureQuestionHeight(block);
-        const top = ET.getOffsetInRoot(block, rootEl).top;
-        const positionInPage = ((top % pageHeight) + pageHeight) % pageHeight;
-        const remainingSpace = positionInPage === 0 ? pageHeight : pageHeight - positionInPage;
+  ET.tryAppendBlock = function (pageEl, blockEl, maxScrollHeight) {
+    pageEl.appendChild(blockEl);
+    const fits = pageEl.scrollHeight <= maxScrollHeight + 1;
+    if (!fits) {
+      pageEl.removeChild(blockEl);
+    }
+    return fits;
+  };
 
-        if (questionHeight >= pageHeight) {
-          if (ET.questionAllowsInternalSplit(block)) {
-            block.classList.add("question-block--allow-internal-split");
-          }
-          if (ET.PAGINATION_DEBUG) {
-            console.log({
-              q: block.dataset.question || block.dataset.type,
-              questionHeight,
-              remainingSpace,
-              pageHeight,
-              top,
-              forceNext: false,
-              allowInternalSplit: ET.questionAllowsInternalSplit(block),
-            });
-          }
-          continue;
-        }
+  ET.paginateBlockElements = function (blockElements, sandbox) {
+    const maxScrollHeight = ET.measurePageMaxScrollHeight(sandbox);
+    const pages = [];
+    let pageEl = ET.startNewPage(sandbox);
 
-        const forceNext = questionHeight > remainingSpace;
+    blockElements.forEach((block) => {
+      const kind = block.dataset.blockKind;
 
-        if (ET.PAGINATION_DEBUG) {
-          console.log({
-            q: block.dataset.question || block.dataset.type,
-            questionHeight,
-            remainingSpace,
-            pageHeight,
-            top,
-            forceNext,
-          });
-        }
+      if (kind === "page-break") {
+        ET.flushPage(pages, pageEl);
+        pageEl = ET.startNewPage(sandbox);
+        return;
+      }
 
-        if (forceNext) {
-          block.classList.add("question-block--force-next-page");
-          block.style.marginTop = `${remainingSpace}px`;
-          block.dataset.paginationMeasure = "1";
-          block.offsetHeight;
-          rootEl.offsetHeight;
+      if (block.dataset.forceNewPage === "true") {
+        if (ET.pageHasContent(pageEl)) {
+          ET.flushPage(pages, pageEl);
+          pageEl = ET.startNewPage(sandbox);
         }
       }
+
+      const node = block.cloneNode(true);
+
+      if (ET.tryAppendBlock(pageEl, node, maxScrollHeight)) {
+        if (ET.PAGINATION_DEBUG) {
+          console.log("[pagination] kept on page", kind, block.dataset.partId || "", pageEl.scrollHeight);
+        }
+        return;
+      }
+
+      if (ET.pageHasContent(pageEl)) {
+        ET.flushPage(pages, pageEl);
+        pageEl = ET.startNewPage(sandbox);
+      }
+
+      pageEl.appendChild(node);
+
+      if (pageEl.scrollHeight > maxScrollHeight + 1) {
+        pageEl.classList.add("exam-page--tall");
+        if (ET.PAGINATION_DEBUG) {
+          console.log("[pagination] oversized block on new page", kind, pageEl.scrollHeight, maxScrollHeight);
+        }
+      }
+    });
+
+    ET.flushPage(pages, pageEl);
+    return pages;
+  };
+
+  ET.layoutExamPreviewPages = function (view, rootEl) {
+    if (!rootEl) return;
+
+    const blockElements = ET.buildExamBlockElements(view);
+    const sandbox = document.createElement("div");
+    sandbox.className = "exam-pagination-sandbox";
+    sandbox.setAttribute("aria-hidden", "true");
+    document.body.appendChild(sandbox);
+
+    try {
+      const pages = ET.paginateBlockElements(blockElements, sandbox);
+      const chrome = ET.renderPrintChrome(ET.safeMeta(view?.meta));
+
+      rootEl.innerHTML = "";
+      rootEl.insertAdjacentHTML("afterbegin", chrome);
+
+      pages.forEach((page, index) => {
+        page.classList.remove("exam-page--measure");
+        if (index === pages.length - 1) {
+          page.classList.add("exam-page--last");
+        }
+        rootEl.appendChild(page);
+      });
     } finally {
-      ET.clearPaginationMeasureStyles(rootEl);
-      rootEl.classList.remove("is-measuring-print");
+      sandbox.remove();
     }
   };
 
-  ET.scheduleQuestionPagination = function (rootEl) {
+  ET.scheduleExamPageLayout = function (view, rootEl) {
     if (!rootEl) return;
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        ET.applyQuestionPagination(rootEl);
+        ET.layoutExamPreviewPages(view, rootEl);
       });
     });
+  };
+
+  /** @deprecated Use scheduleExamPageLayout — kept for app.js beforeprint hook */
+  ET.applyQuestionPagination = function (rootEl) {
+    if (!rootEl || typeof ET.ExamToolkitAPI?.getView !== "function") return;
+    ET.layoutExamPreviewPages(ET.ExamToolkitAPI.getView(), rootEl);
+  };
+
+  ET.scheduleQuestionPagination = function (rootEl) {
+    /* no-op: layout driven by renderExamPreview + scheduleExamPageLayout */
   };
 })(window.ExamToolkit);

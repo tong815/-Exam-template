@@ -27,7 +27,7 @@ Read all questions carefully before you begin.
 2. **Calculators:** [ALLOWED / NOT ALLOWED — circle or delete one]
 3. **Rounding:** Round decimal answers to **2 decimal places** unless otherwise stated.
 4. **Domain & Range:** Clearly state restrictions, domain, and range when required.
-5. Write legibly. Use proper mathematical notation (\\(f(x)\\), \\(\\mathbb{R}\\), etc.). Currency stays plain text ($10).
+5. Write legibly. Use proper mathematical notation (e.g. \(f(x)\), \(\mathbb{R}\)). Do not use `$` for currency — write **10 dollars** instead of **$10**.
 6. Manage your time. Marks are shown in **[ ]** beside each question.
 
 ---

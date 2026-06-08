@@ -509,15 +509,56 @@ body {
    -------------------------------------------------------------------------- */
 
 .exam-document {
-  max-width: var(--exam-max-width);
+  max-width: none;
   margin: 1.25rem auto 0;
-  padding: var(--exam-padding);
-  background: var(--color-paper);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 html[data-paper="a4"] .exam-document {
-  max-width: 210mm;
+  max-width: none;
+}
+
+.exam-page {
+  width: 8.5in;
+  min-height: 11in;
+  padding: 0.7in 0.65in;
+  background: var(--color-paper);
+  box-sizing: border-box;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  page-break-after: always;
+  break-after: page;
+}
+
+html[data-paper="a4"] .exam-page {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 1.8cm 1.5cm;
+}
+
+.exam-page--last {
+  page-break-after: auto;
+  break-after: auto;
+  margin-bottom: 0;
+}
+
+.exam-page .exam-section {
+  margin-top: 0;
+}
+
+.exam-pagination-sandbox {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.pagination-block {
+  display: block;
 }
 
 .print-header,
@@ -934,6 +975,27 @@ body.show-answer-key .question-block__answer-key {
     box-shadow: none;
   }
 
+  .exam-page {
+    width: auto;
+    min-height: auto;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .exam-page--last {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  html[data-paper="a4"] .exam-page {
+    width: auto;
+    min-height: auto;
+    padding: 0;
+  }
+
   .print-header,
   .print-footer {
     display: none !important;
@@ -1046,18 +1108,4 @@ body.show-answer-key .question-block__answer-key {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-}
-
-/* Match print content width while measuring pagination on screen */
-.exam-document.is-measuring-print {
-  padding: 0 !important;
-  margin: 0 !important;
-  max-width: none !important;
-  width: 7.2in;
-  box-shadow: none;
-  font-size: 10.5pt;
-}
-
-html[data-paper="a4"] .exam-document.is-measuring-print {
-  width: 180mm;
 }

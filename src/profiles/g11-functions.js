@@ -207,16 +207,25 @@
       },
       formatting: {
         math: {
+          engine: "KaTeX",
           inlineDelimiter: "\\( ... \\)",
-          examples: [
-            "\\(x^2-9x+20\\)",
-            "\\(y=-2(x-3)^2+5\\)",
-            "\\(y=ab^x\\)",
-            "\\(\\sin 30^\\circ\\)",
-            "\\(\\frac{\\sqrt{3}}{2}\\)",
+          blockDelimiter: "\\[ ... \\]",
+          requiredRendererBehavior: [
+            "Render every string field that may be visible to students or teachers through the shared MathText/KaTeX renderer.",
+            "Apply KaTeX rendering to question.stem, option.text, answerKey, teacherNote, part.description, instructions, bonus.stem, and any future visible text fields.",
+            "Do not render raw HTML from JSON. Treat JSON text as plain text except KaTeX math segments delimited by \\( ... \\).",
+            "If KaTeX parsing fails, display the original text and log a non-blocking warning.",
           ],
-          notes:
-            "Official inline math delimiter is \\( ... \\). Do not use $...$ in exam JSON — it conflicts with currency ($10, $6, $1).",
+          authoringRules: [
+            "Do not use the dollar sign in plain text. Write currency as '10 dollars' instead of '$10'. Inline math must use \\( ... \\).",
+            "Use superscripts with braces when the exponent has more than one token, for example \\(2^{x+1}\\) and \\(2^{t/3}\\).",
+            "Use \\frac{}{} for fractions inside math, for example \\(\\frac{1}{2}\\).",
+            "Use \\sqrt{} for radicals, for example \\(\\frac{\\sqrt{3}}{2}\\).",
+            "Use trig commands and degree notation, for example \\(\\sin 30^\\circ\\).",
+            "Do not use plain x^2, sqrt(3)/2, 2^(x+1), or sin 30° in newly generated visible question text.",
+          ],
+          generationHintForChatGPT:
+            "When generating future exam-data JSON from this template, write all visible mathematical expressions in KaTeX-compatible LaTeX delimited by \\( ... \\). Do not use $ for currency; write '10 dollars' instead of '$10'. Keep non-math text as normal prose.",
         },
       },
       settings: {

@@ -176,14 +176,6 @@
         ...(overrides.bonus || {}),
       },
       rubric: overrides.rubric || {},
-      formatting: {
-        math: {
-          inlineDelimiter: "\\( ... \\)",
-          notes:
-            "Official inline math delimiter is \\( ... \\). Do not use $...$ in exam JSON — it conflicts with currency such as $10.",
-        },
-        ...(overrides.formatting || {}),
-      },
       settings: {
         showMarkDistribution: true,
         showInstructions: true,
@@ -192,16 +184,6 @@
         ...(overrides.settings || {}),
       },
     };
-  };
-
-  /** Convert legacy $...$ inline math to \\( ... \\). Plain currency like $10 is untouched. */
-  ET.migrateDollarMathDelimiters = function (text) {
-    if (typeof text !== "string" || !text.includes("$")) return text;
-    return text.replace(/\$([^$\n]+?)\$/g, (_, latex) => `\\(${latex}\\)`);
-  };
-
-  ET.migrateExamTextValue = function (value) {
-    return typeof value === "string" ? ET.migrateDollarMathDelimiters(value) : value;
   };
 
   ET.uid = function (prefix) {
@@ -261,20 +243,12 @@
       migrated.meta = ET.migrateMeta(migrated.meta, migrated.profile);
     }
 
-    if (Array.isArray(migrated.instructions)) {
-      migrated.instructions = migrated.instructions.map((line) => ET.migrateExamTextValue(line));
-    }
-
     if (Array.isArray(migrated.parts)) {
       migrated.parts = migrated.parts.map((p) => ET.migratePart(p));
     }
 
     if (migrated.bonus && typeof migrated.bonus === "object") {
       migrated.bonus = ET.migrateBonusRaw(migrated.bonus);
-    }
-
-    if (migrated.rubric && typeof migrated.rubric === "object" && typeof migrated.rubric.notes === "string") {
-      migrated.rubric.notes = ET.migrateExamTextValue(migrated.rubric.notes);
     }
 
     return migrated;
@@ -309,9 +283,6 @@
     delete p.defaultSolutionLines;
     /* questionCount kept for normalizePart legacy expansion */
 
-    p.title = ET.migrateExamTextValue(p.title);
-    p.description = ET.migrateExamTextValue(p.description);
-
     if (Array.isArray(p.questions)) {
       p.questions = p.questions.map((q) => ET.migrateQuestionRaw(q, p));
     }
@@ -329,16 +300,6 @@
     }
     if (!q.type && part?.defaultQuestionType) q.type = part.defaultQuestionType;
 
-    q.stem = ET.migrateExamTextValue(q.stem);
-    q.answerKey = ET.migrateExamTextValue(q.answerKey);
-    q.teacherNote = ET.migrateExamTextValue(q.teacherNote);
-    if (Array.isArray(q.options)) {
-      q.options = q.options.map((o) => ({
-        ...o,
-        text: ET.migrateExamTextValue(o.text),
-      }));
-    }
-
     return q;
   };
 
@@ -350,9 +311,6 @@
       b.answerSpace = { type: "lines", lines: Number(b.solutionLines) || 0 };
     }
     delete b.solutionLines;
-    b.stem = ET.migrateExamTextValue(b.stem);
-    b.answerKey = ET.migrateExamTextValue(b.answerKey);
-    b.teacherNote = ET.migrateExamTextValue(b.teacherNote);
     return b;
   };
 

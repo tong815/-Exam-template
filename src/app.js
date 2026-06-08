@@ -478,15 +478,15 @@
     });
 
     btnPrint.addEventListener("click", () => {
-      if (typeof ET.applyQuestionPagination === "function") {
-        ET.applyQuestionPagination(examRoot);
+      if (typeof ET.layoutExamPreviewPages === "function") {
+        ET.layoutExamPreviewPages(getBuiltView(), examRoot);
       }
       window.print();
     });
 
     window.addEventListener("beforeprint", () => {
-      if (typeof ET.applyQuestionPagination === "function") {
-        ET.applyQuestionPagination(examRoot);
+      if (typeof ET.layoutExamPreviewPages === "function") {
+        ET.layoutExamPreviewPages(getBuiltView(), examRoot);
       }
     });
 

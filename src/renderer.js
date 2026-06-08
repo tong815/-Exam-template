@@ -96,32 +96,11 @@
 
   ET.renderExamPreview = function (view, rootEl) {
     if (!rootEl) return;
-    const safeView = {
-      meta: ET.safeMeta(view?.meta),
-      instructions: view?.instructions || [],
-      markDistribution: view?.markDistribution || [],
-      parts: (view?.parts || []).map(ET.safePart),
-      bonus: view?.bonus || { enabled: false },
-      settings: view?.settings || {},
-    };
-
-    const parts = [];
-    parts.push(ET.renderPrintChrome(safeView.meta));
-    parts.push(ET.renderTitleBlock(safeView.meta));
-    if (safeView.settings.showInstructions !== false) {
-      parts.push(ET.renderInstructions(safeView.instructions));
+    if (typeof ET.scheduleExamPageLayout === "function") {
+      ET.scheduleExamPageLayout(view, rootEl);
+      return;
     }
-    if (safeView.settings.showMarkDistribution !== false) {
-      parts.push(ET.renderMarkDistribution(safeView.markDistribution));
-    }
-    safeView.parts.forEach((p) => parts.push(ET.renderPart(p)));
-    parts.push(ET.renderBonus(safeView.bonus));
-    parts.push(`<p class="exam-end">— End of Examination — Good luck! / Bonne chance! —</p>`);
-
-    rootEl.innerHTML = parts.join("\n");
-    if (typeof ET.scheduleQuestionPagination === "function") {
-      ET.scheduleQuestionPagination(rootEl);
-    }
+    ET.layoutExamPreviewPages(view, rootEl);
   };
 
   ET.renderPrintChrome = function (meta) {
@@ -283,7 +262,6 @@
       return ET.renderPageBreakBlock(safe);
     }
 
-    const beforeMarker = safe.pageBreakBefore ? ET.renderPageBreakMarker() : "";
     const keepWhole =
       safe.type === "multiple-choice" ||
       safe.type === "true-false" ||
@@ -302,7 +280,6 @@
       : "";
 
     return `
-      ${beforeMarker}
       <article class="question-block${breakClass}" data-question="${safe.number}" data-type="${safe.type}">
         <div class="question-block__header">
           <span class="question-block__number">${safe.number}.</span>
