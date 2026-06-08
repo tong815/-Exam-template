@@ -721,6 +721,23 @@ html[data-paper="a4"] .exam-document {
   flex: 1;
 }
 
+.math-text .katex {
+  font-size: 1em;
+}
+
+.exam-section__description .katex,
+.options-list .katex,
+.question-block__answer-key .katex,
+.teacher-note .katex {
+  font-size: 1em;
+}
+
+.math-fallback {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  color: var(--color-muted);
+}
+
 .question-block__marks {
   font-weight: 700;
   white-space: nowrap;
@@ -973,6 +990,11 @@ body.show-answer-key .question-block__answer-key {
 
   .mark-table th {
     background: #eee !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .katex {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

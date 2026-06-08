@@ -546,6 +546,9 @@
       setPaperSize: applyPaperSize,
       setLanguage: switchLanguage,
       t: ET.t,
+      renderMathText: ET.renderMathText,
+      preprocessLegacyMath: ET.preprocessLegacyMath,
+      hasKatex: ET.hasKatex,
     };
   }
 

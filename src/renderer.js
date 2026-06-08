@@ -4,6 +4,10 @@
 (function (ET) {
   "use strict";
 
+  ET.mt = function (text) {
+    return typeof ET.renderMathText === "function" ? ET.renderMathText(text) : ET.escapeHtml(text);
+  };
+
   ET.safeMeta = function (meta) {
     const m = meta || {};
     return {
@@ -148,7 +152,7 @@
   };
 
   ET.renderInstructions = function (instructions) {
-    const items = (instructions || []).map((t) => `<li>${ET.escapeHtml(t)}</li>`).join("");
+    const items = (instructions || []).map((t) => `<li>${ET.mt(t)}</li>`).join("");
     return `
       <section class="exam-section">
         <h2 class="exam-section__heading">Instructions</h2>
@@ -164,7 +168,7 @@
           : row.isBonus
             ? `<em>${ET.escapeHtml(row.part)}</em>`
             : `<strong>${ET.escapeHtml(row.part)}</strong>`;
-        const section = row.isBonus ? `<em>${ET.escapeHtml(row.section)}</em>` : ET.escapeHtml(row.section);
+        const section = row.isBonus ? `<em>${ET.escapeHtml(row.section)}</em>` : ET.mt(row.section);
         const subtotal =
           row.isTotal || !row.isBonus
             ? `<strong>${ET.escapeHtml(row.subtotal)}</strong>`
@@ -222,7 +226,7 @@
             ? options
                 .map(
                   (o) =>
-                    `<li><span class="option-label">${ET.escapeHtml(o.key)})</span>${ET.escapeHtml(o.text)}</li>`
+                    `<li><span class="option-label">${ET.escapeHtml(o.key)})</span>${ET.mt(o.text)}</li>`
                 )
                 .join("")
             : "<li><em>[No options provided]</em></li>";
@@ -253,7 +257,7 @@
       case "matching": {
         const pairs =
           options.length > 0
-            ? options.map((o) => `<li>${ET.escapeHtml(o.key)}. ${ET.escapeHtml(o.text)}</li>`).join("")
+            ? options.map((o) => `<li>${ET.escapeHtml(o.key)}. ${ET.mt(o.text)}</li>`).join("")
             : "<li>[PLACEHOLDER: matching items]</li>";
         return `
           <ul class="options-list">${pairs}</ul>
@@ -285,10 +289,10 @@
     const attachmentsHtml = ET.renderAttachments(safe.attachments);
     const body = ET.renderQuestionBody(safe);
     const teacherNote = safe.teacherNote
-      ? `<div class="teacher-note"><span class="teacher-note__label">Note:</span>${ET.escapeHtml(safe.teacherNote)}</div>`
+      ? `<div class="teacher-note"><span class="teacher-note__label">Note:</span>${ET.mt(safe.teacherNote)}</div>`
       : "";
     const answerKey = safe.answerKey
-      ? `<div class="question-block__answer-key"><strong>Answer key:</strong> ${ET.escapeHtml(safe.answerKey)}</div>`
+      ? `<div class="question-block__answer-key"><strong>Answer key:</strong> ${ET.mt(safe.answerKey)}</div>`
       : "";
 
     return `
@@ -296,7 +300,7 @@
       <article class="question-block${breakClass}" data-question="${safe.number}" data-type="${safe.type}">
         <div class="question-block__header">
           <span class="question-block__number">${safe.number}.</span>
-          <span class="question-block__stem">${ET.escapeHtml(safe.stem)}</span>
+          <span class="question-block__stem math-text">${ET.mt(safe.stem)}</span>
           <span class="question-block__marks">[${ET.escapeHtml(safe.marks)}]</span>
         </div>
         ${attachmentsHtml}
@@ -308,9 +312,9 @@
 
   ET.renderPartIntro = function (safe) {
     return `
-        <h2 class="exam-section__heading">Part ${ET.escapeHtml(safe.label)} — ${ET.escapeHtml(safe.title)}</h2>
+        <h2 class="exam-section__heading">Part ${ET.escapeHtml(safe.label)} — <span class="math-text">${ET.mt(safe.title)}</span></h2>
         <p class="exam-section__summary">${ET.escapeHtml(safe.marksSummary)}</p>
-        <p class="exam-section__description">${ET.escapeHtml(safe.description)}</p>`;
+        <p class="exam-section__description math-text">${ET.mt(safe.description)}</p>`;
   };
 
   ET.renderPartQuestionItems = function (questions, startIndex) {

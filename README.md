@@ -31,6 +31,7 @@ Exam-template/
 │  ├─ editor.js
 │  ├─ renderer.js
 │  ├─ storage.js
+│  ├─ math.js               # KaTeX $...$ rendering
 │  ├─ schema.js
 │  ├─ i18n.js
 │  ├─ templates.js          # starter template 注册
@@ -131,6 +132,24 @@ C:\Users\chena\Desktop\试卷json\
 G11 Functions Template 默认：Part B/C/D 前分页；Part D 前两题 `avoid`、后两题（较长）`auto`。
 
 详见 [docs/schema-v1.md](docs/schema-v1.md)。
+
+---
+
+## Math / KaTeX
+
+预览与打印使用 **KaTeX** 渲染 `$...$` 内的 inline math（`src/math.js`，CDN 加载，无 React/npm 构建）。
+
+| 位置 | 支持数学 |
+|:-----|:---------|
+| 题干 `stem` | ✓ |
+| 选项 `options[].text` | ✓ |
+| Part 标题 / 说明 | ✓ |
+| 答案预览 `answerKey` | ✓ |
+| 教师备注 `teacherNote` | ✓ |
+| 考试说明 `instructions` | ✓ |
+
+示例：`"stem": "Solve $x^2-9x+20=0$."`  
+旧数据中的 `x^2`、`2^(x+1)` 等会在无 `$` 时自动迁移层转换；新题请直接写标准 KaTeX。
 
 ---
 

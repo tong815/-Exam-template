@@ -117,7 +117,7 @@ Parts are **not** limited to A/B/C/D. Use any `id` / `label` pattern.
 | `id` | string | recommended | Stable unique id (validated globally) |
 | `number` | number | optional | Display number; auto-assigned if omitted |
 | `type` | string | yes | See question types below |
-| `stem` | string | yes | Question text (may be placeholder) |
+| `stem` | string | yes | Question text; inline math with `$...$` (KaTeX) — see [Math / KaTeX](#math--katex) |
 | `marks` | number | yes | Points, must be `>= 0` |
 | `options` | `{key,text}[]` | conditional | Required for MC / matching |
 | `answerSpace` | answerSpace | optional | Student answer area |
@@ -139,6 +139,35 @@ Parts are **not** limited to A/B/C/D. Use any `id` / `label` pattern.
 | Numbering | skipped (does not receive Q#) |
 
 Use **Add Page Break** in the editor or set `type: "page-break"` manually. Renders as `--- Page Break ---` on screen; forces a new printed page.
+
+### Math / KaTeX
+
+Preview and print render inline math delimited by **`$...$`** using [KaTeX](https://katex.org/) (`src/math.js`).
+
+| Field | Math support |
+|:------|:-------------|
+| `stem` | yes |
+| `options[].text` | yes |
+| `answerKey` | yes (answer key preview) |
+| `teacherNote` | yes (teacher notes preview) |
+| Part `title` / `description` | yes |
+| `instructions[]` | yes |
+
+**Standard format (preferred for new exams):**
+
+```json
+{ "stem": "Find the zeros of $x^2-9x+20$." }
+{ "stem": "Evaluate $2^{x+1}$ when $x=3$." }
+{ "stem": "Simplify $\\sqrt{75}$." }
+{ "stem": "Compute $\\frac{3}{4}+\\frac{1}{2}$." }
+{ "stem": "Find $\\sin 30^\\circ$." }
+```
+
+In JSON files, backslashes in LaTeX must be escaped: `\\frac`, `\\sqrt`, etc.
+
+**Legacy migration (no `$` in string):** plain patterns like `x^2`, `2^(x+1)`, `sqrt(3)/2` are auto-wrapped for preview only. New content should use `$...$` directly.
+
+The left **Editor** shows raw text; the right **Preview** renders math.
 
 ### `attachments[]` (placeholder rendering)
 
