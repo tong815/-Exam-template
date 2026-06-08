@@ -39,21 +39,6 @@
     return (node.offsetHeight || 0) + marginBottom;
   };
 
-  ET.getPositionInPage = function (top, pageHeight) {
-    return ((top % pageHeight) + pageHeight) % pageHeight;
-  };
-
-  ET.getRemainingSpaceOnPage = function (top, pageHeight) {
-    const positionInPage = ET.getPositionInPage(top, pageHeight);
-    if (positionInPage === 0) return pageHeight;
-    return pageHeight - positionInPage;
-  };
-
-  ET.getNextPageStart = function (top, pageHeight) {
-    const pageIndex = Math.floor(top / pageHeight);
-    return (pageIndex + 1) * pageHeight;
-  };
-
   ET.questionAllowsInternalSplit = function (block) {
     const type = block.dataset.type || "";
     if (
@@ -79,14 +64,23 @@
       });
   };
 
+  ET.clearPaginationMeasureStyles = function (rootEl) {
+    if (!rootEl) return;
+    rootEl.querySelectorAll("[data-pagination-measure]").forEach((el) => {
+      el.style.marginTop = "";
+      delete el.dataset.paginationMeasure;
+    });
+  };
+
   /**
-   * Pack questions sequentially. Each decision accounts for prior forced page breaks.
-   * break-before: page does not reflow screen layout, so printShift simulates print positions.
+   * Pack questions sequentially. Each question is measured after prior breaks
+   * are applied; temporary margin-top simulates print reflow during measurement.
    */
   ET.applyQuestionPagination = function (rootEl) {
     if (!rootEl) return;
 
     ET.clearQuestionPagination(rootEl);
+    ET.clearPaginationMeasureStyles(rootEl);
 
     const pageHeight = ET.getPrintPageUsableHeightPx();
     if (!pageHeight || pageHeight <= 0) return;
@@ -96,12 +90,12 @@
 
     try {
       const questions = [...rootEl.querySelectorAll('.question-block:not([data-type="page-break"])')];
-      let printShift = 0;
 
       for (const block of questions) {
         const questionHeight = ET.measureQuestionHeight(block);
-        const layoutTop = ET.getOffsetInRoot(block, rootEl).top;
-        const top = layoutTop + printShift;
+        const top = ET.getOffsetInRoot(block, rootEl).top;
+        const positionInPage = ((top % pageHeight) + pageHeight) % pageHeight;
+        const remainingSpace = positionInPage === 0 ? pageHeight : pageHeight - positionInPage;
 
         if (questionHeight >= pageHeight) {
           if (ET.questionAllowsInternalSplit(block)) {
@@ -111,11 +105,9 @@
             console.log({
               q: block.dataset.question || block.dataset.type,
               questionHeight,
-              remainingSpace: null,
+              remainingSpace,
               pageHeight,
-              layoutTop,
-              printTop: top,
-              printShift,
+              top,
               forceNext: false,
               allowInternalSplit: ET.questionAllowsInternalSplit(block),
             });
@@ -123,7 +115,6 @@
           continue;
         }
 
-        const remainingSpace = ET.getRemainingSpaceOnPage(top, pageHeight);
         const forceNext = questionHeight > remainingSpace;
 
         if (ET.PAGINATION_DEBUG) {
@@ -132,20 +123,21 @@
             questionHeight,
             remainingSpace,
             pageHeight,
-            layoutTop,
-            printTop: top,
-            printShift,
+            top,
             forceNext,
           });
         }
 
         if (forceNext) {
           block.classList.add("question-block--force-next-page");
-          printShift += ET.getNextPageStart(top, pageHeight) - top;
+          block.style.marginTop = `${remainingSpace}px`;
+          block.dataset.paginationMeasure = "1";
           block.offsetHeight;
+          rootEl.offsetHeight;
         }
       }
     } finally {
+      ET.clearPaginationMeasureStyles(rootEl);
       rootEl.classList.remove("is-measuring-print");
     }
   };

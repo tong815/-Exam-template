@@ -117,7 +117,7 @@ Parts are **not** limited to A/B/C/D. Use any `id` / `label` pattern.
 | `id` | string | recommended | Stable unique id (validated globally) |
 | `number` | number | optional | Display number; auto-assigned if omitted |
 | `type` | string | yes | See question types below |
-| `stem` | string | yes | Question text; inline math with `$...$` (KaTeX) — see [Math / KaTeX](#math--katex) |
+| `stem` | string | yes | Question text; inline math with `\\( ... \\)` (KaTeX) — see [Math / KaTeX](#math--katex) |
 | `marks` | number | yes | Points, must be `>= 0` |
 | `options` | `{key,text}[]` | conditional | Required for MC / matching |
 | `answerSpace` | answerSpace | optional | Student answer area |
@@ -142,7 +142,9 @@ Use **Add Page Break** in the editor or set `type: "page-break"` manually. Rende
 
 ### Math / KaTeX
 
-Preview and print render inline math delimited by **`$...$`** using [KaTeX](https://katex.org/) (`src/math.js`).
+Preview and print render inline math delimited by **`\\( ... \\)`** using [KaTeX](https://katex.org/) (`src/math.js`).
+
+**Do not use `$...$` in exam JSON** — dollar signs are reserved for currency (`$10`, `$6`, etc.).
 
 | Field | Math support |
 |:------|:-------------|
@@ -153,19 +155,22 @@ Preview and print render inline math delimited by **`$...$`** using [KaTeX](http
 | Part `title` / `description` | yes |
 | `instructions[]` | yes |
 
-**Standard format (preferred for new exams):**
+**Standard format (required for new exams):**
 
 ```json
-{ "stem": "Find the zeros of $x^2-9x+20$." }
-{ "stem": "Evaluate $2^{x+1}$ when $x=3$." }
-{ "stem": "Simplify $\\sqrt{75}$." }
-{ "stem": "Compute $\\frac{3}{4}+\\frac{1}{2}$." }
-{ "stem": "Find $\\sin 30^\\circ$." }
+{ "stem": "Find the zeros of \\(x^2-9x+20\\)." }
+{ "stem": "Evaluate \\(2^{x+1}\\) when \\(x=3\\)." }
+{ "stem": "Simplify \\(\\sqrt{75}\\)." }
+{ "stem": "Compute \\(\\frac{3}{4}+\\frac{1}{2}\\)." }
+{ "stem": "Find \\(\\sin 30^\\circ\\)." }
+{ "stem": "Each scarf costs $10. Revenue is \\(R=10n\\) dollars." }
 ```
 
-In JSON files, backslashes in LaTeX must be escaped: `\\frac`, `\\sqrt`, etc.
+In JSON files, backslashes in LaTeX must be escaped: `\\frac`, `\\sqrt`, `\\(`, `\\)`, etc.
 
-**Legacy migration (no `$` in string):** plain patterns like `x^2`, `2^(x+1)`, `sqrt(3)/2` are auto-wrapped for preview only. New content should use `$...$` directly.
+**Legacy migration:** on load, paired `$...$` segments are converted to `\\( ... \\)` (plain currency like `$10` is not changed). Plain patterns like `x^2`, `2^(x+1)`, `sqrt(3)/2` are auto-wrapped for preview when no `\\(` is present.
+
+Optional top-level **`formatting.math`** documents delimiter rules for authors and AI tools.
 
 The left **Editor** shows raw text; the right **Preview** renders math.
 

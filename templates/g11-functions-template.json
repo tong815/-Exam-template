@@ -778,6 +778,19 @@
     ],
     "notes": "See docs/reference/g11-functions/rubric-template.md for full descriptors."
   },
+  "formatting": {
+    "math": {
+      "inlineDelimiter": "\\( ... \\)",
+      "examples": [
+        "\\(x^2-9x+20\\)",
+        "\\(y=-2(x-3)^2+5\\)",
+        "\\(y=ab^x\\)",
+        "\\(\\sin 30^\\circ\\)",
+        "\\(\\frac{\\sqrt{3}}{2}\\)"
+      ],
+      "notes": "Official inline math delimiter is \\( ... \\). Do not use $...$ in exam JSON — it conflicts with currency ($10, $6, $1)."
+    }
+  },
   "settings": {
     "showMarkDistribution": true,
     "showInstructions": true,
