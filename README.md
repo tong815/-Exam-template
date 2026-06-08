@@ -41,7 +41,7 @@ Exam-template/
 
 | 层 | 位置 | 职责 |
 |:---|:-----|:-----|
-| **通用模板层** | `src/`, `index.html`, `styles.css` | 数据结构、编辑器、预览、打印、JSON 导入导出 |
+| **通用模板层** | `src/`, `index.html`, `styles.css` | 数据结构、编辑器、预览、打印、项目文件读写 |
 | **考试内容层** | `exams/<profile>/` | 某年级/科目的 markdown 模板、`exam-data.json`、rubric 等 |
 
 通用代码（`src/schema.js`、`src/templates.js` 等）**不写死** Grade 11、Functions、MCR3U、Ontario、KTCA 等；这些只出现在 `exams/` 与 `src/profiles/` 等内容文件中。
@@ -68,11 +68,13 @@ Exam-template/
 调试 API：
 
 ```javascript
-ExamToolkitAPI.validate()   // 当前试卷校验结果
-ExamToolkitAPI.migrate(raw)   // 仅迁移旧字段
-ExamToolkitAPI.normalize(raw) // 迁移 + 标准化
+ExamToolkitAPI.validate()        // 当前试卷校验结果
+ExamToolkitAPI.openProject()     // 打开项目文件
+ExamToolkitAPI.saveProject()     // 保存项目（覆盖）
+ExamToolkitAPI.saveProjectAs()   // 项目另存为
+ExamToolkitAPI.getProjectInfo()  // { fileName, isDirty, hasFileHandle }
 ExamToolkitAPI.setLanguage("zh") // 切换编辑器界面语言
-ExamToolkitAPI.t("toolbar.save") // 翻译 key
+ExamToolkitAPI.t("toolbar.saveProject") // 翻译 key
 ```
 
 ---
@@ -183,7 +185,7 @@ ExamToolkitAPI.t("toolbar.save") // 翻译 key
 
 | 区域 | 说明 |
 |:-----|:-----|
-| **Toolbar** | Profile、纸张、保存、重置、导入/导出、另存到文件夹、打印、答案/备注切换 |
+| **Toolbar** | Profile、纸张、打开/保存项目、保存草稿、重置、打印、答案/备注切换；顶部显示当前项目名 |
 | **左侧 Editor** | Profile、Meta、显示设置、Part 结构、每题字段 |
 | **右侧 Preview** | 学生卷实时预览 |
 
@@ -198,7 +200,69 @@ ExamToolkitAPI.t("toolbar.save") // 翻译 key
 | **Blank Template** | 通用空白骨架（1 个 Section） |
 | **G11 Functions** | 加载 `exams/g11-functions/exam-data.json`（或内置回退） |
 
-切换 Profile 会提示确认（避免误覆盖未导出编辑）。
+切换 Profile 会提示确认（避免误覆盖未保存编辑）。
+
+### 推荐工作流（Project File）
+
+编辑器按 **Word 式项目文件** 工作：`exam-data.json` 是真实工程文件，不再以下载 JSON 为主流程。
+
+**打开已有考试：**
+
+```text
+Open Project（打开项目）
+    ↓
+选择 exam-data.json（例如 C:\Users\chena\Desktop\试卷json\...\exam-data.json）
+    ↓
+编辑
+    ↓
+Save Project（保存项目）→ 直接覆盖原文件
+    ↓
+Print / Save as PDF
+```
+
+**新建考试：**
+
+```text
+Load Profile（或 Blank Template）
+    ↓
+编辑骨架
+    ↓
+Save Project As（项目另存为）
+    ↓
+保存到例如：C:\Users\chena\Desktop\试卷json\G11 Functions\Final 2026\exam-data.json
+```
+
+| 操作 | 说明 |
+|:-----|:-----|
+| **Open Project** | 用系统文件选择器打开 `.json` 项目文件 |
+| **Save Project** | 若有已打开文件则直接覆盖；否则自动走 **Save Project As** |
+| **Save Project As** | 另存为新 `exam-data.json` 或 `<examId>.json` |
+| **Save Draft** | 仅写入 `localStorage`（浏览器恢复草稿，非磁盘工程） |
+| **Reset to Default** | 恢复当前 Profile 默认数据 |
+
+工具栏显示 **当前项目：** 文件名；有未保存修改时显示 `*`（例如 `exam-data.json *`）。未打开项目时显示 **未保存草稿**。离开页面前若有未保存修改会触发 `beforeunload` 提示。
+
+**浏览器要求：** Open / Save Project 依赖 Chrome 或 Edge 的 [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker)（`showOpenFilePicker` / `showSaveFilePicker`）。Firefox / Safari 等不支持时会 toast 提示，程序不崩溃。
+
+### 考试工程目录建议
+
+真实考试建议放在固定根目录，例如：
+
+```text
+C:\Users\chena\Desktop\试卷json\
+│
+├─ G11 Functions/
+│   ├─ Final 2026/
+│   │   ├─ exam-data.json
+│   │   ├─ exam.pdf
+│   │   └─ notes.md
+│   │
+│   └─ Unit Test 1/
+│
+├─ G12 Advanced Functions/
+│
+└─ Physics/
+```
 
 ### 修改题量与分值
 
@@ -209,42 +273,9 @@ ExamToolkitAPI.t("toolbar.save") // 翻译 key
 
 **Total Marks** 自动计算（不含 Bonus 加分计入总分表）。
 
-### 保存 / 导入 / 导出 JSON
+### 草稿自动保存（localStorage）
 
-| 操作 | 说明 |
-|:-----|:-----|
-| **自动保存** | 每次编辑写入 `localStorage`（键：`exam-template-editor-v1`） |
-| **Save** | 手动触发保存 |
-| **Export JSON** | 下载当前 `exam-data.json` |
-| **Save As Folder / 另存到文件夹** | 选择本地文件夹并写入 `exam-data.json`（见下节） |
-| **Import JSON** | 从本地 JSON 恢复（覆盖当前编辑状态） |
-| **Reset to Default** | 恢复当前 Profile 的默认数据 |
-
-### Save As Folder / 另存到文件夹
-
-工具栏 **Save As Folder**（中文界面：**另存到文件夹**）在编辑完成后，把当前试卷保存到你指定的本地文件夹。这不是替代 **Export JSON**，而是更方便的「按项目目录落盘」方式。
-
-| 要点 | 说明 |
-|:-----|:-----|
-| **浏览器要求** | 依赖 Chrome / Edge 的 [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker)（`showDirectoryPicker`） |
-| **用户操作** | 点击按钮 → 系统弹出文件夹选择窗口 → 你手动选择目标目录 |
-| **v1 写入文件** | 至少写入 `exam-data.json`（当前完整 `examData` JSON）；同时生成 `README.md`（含 examId、profile、testTitle、导出时间与重开说明） |
-| **不支持时** | Firefox / Safari 等可能不支持；会提示使用 **Export JSON**，程序不会崩溃 |
-| **推荐路径** | `projects/<course-or-profile>/<exam-name>/exam-data.json` |
-
-示例：
-
-```text
-projects/g11-functions/final-2026/exam-data.json
-```
-
-重新打开该试卷：
-
-1. 打开 Exam Template Editor 的 `index.html`
-2. 点击 **Import JSON**
-3. 选择该文件夹中的 `exam-data.json`
-
-**不会做的事：** 自动扫描本地目录、自动创建多级父目录、把 PDF 写入文件夹、绕过浏览器权限、或使用 Node.js 后端——仅在用户选定文件夹后，在浏览器允许的安全范围内写入文件。
+每次编辑仍会写入 `localStorage`（键：`exam-template-editor-v1`），用于刷新页面后恢复上次编辑。**Save Draft** 可手动触发同一机制。磁盘上的正式工程文件请用 **Save Project**。
 
 ### 打印 PDF
 
@@ -310,7 +341,7 @@ cp exams/g11-functions/exam-data.json exams/g12-advanced-functions/exam-data.jso
 
 `src/templates.js` 只保留 `registerProfile` 与 Blank Template，**不要**把科目内容写进去。
 
-也可跳过注册，直接 **Import JSON** 载入 `exam-data.json`。
+也可跳过注册，用 **Open Project** 打开 `exam-data.json`。
 
 ### 4. 参考 examples/
 
@@ -325,10 +356,10 @@ cp exams/g11-functions/exam-data.json exams/g12-advanced-functions/exam-data.jso
 ### 5. 工作流建议
 
 1. 在编辑器中搭好骨架（题量、分值、答题行数）
-2. **Export JSON**
+2. **Save Project As** 到 `试卷json/<课程>/<考试名>/exam-data.json`
 3. 将 JSON 交给 ChatGPT / 其他工具生成正式题干
 4. 用 Cursor 按同一 JSON 结构填回 `stem`、`options`、`answerKey`
-5. **Import JSON** 或更新 `exams/.../exam-data.json` 后重新加载 Profile
+5. **Open Project** 继续编辑，**Save Project** 覆盖保存
 6. 打印 PDF 或继续用 Markdown 模板出卷
 
 ---
@@ -360,4 +391,4 @@ Markdown 模板与 Ontario KTCA rubric 说明见 `exams/g11-functions/`。
 
 通用框架可自由修改复用；`exams/` 下具体题目内容版权归出题教师所有。
 
-*Last updated: Schema hardening v1 — exam schema v1.0*
+*Last updated: Project file editor — Open / Save Project workflow*

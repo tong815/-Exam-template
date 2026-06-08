@@ -199,7 +199,7 @@
           ${hasErrors ? `<p class="validation-summary__label">${ET.escapeHtml(ET.t("validation.errors"))}</p>${errorList}` : ""}
           ${hasWarnings ? `<p class="validation-summary__label">${ET.escapeHtml(ET.t("validation.warnings"))}</p>${warnList}` : ""}
           ${!hasErrors && !hasWarnings ? `<p class="validation-summary__hint">${ET.escapeHtml(ET.t("validation.noIssues"))}</p>` : ""}
-          ${hasErrors ? `<p class="validation-summary__hint">${ET.escapeHtml(ET.t("validation.fixBeforeExport"))}</p>` : ""}
+          ${hasErrors ? `<p class="validation-summary__hint">${ET.escapeHtml(ET.t("validation.fixBeforeSave"))}</p>` : ""}
         </div>
       </details>`;
   };

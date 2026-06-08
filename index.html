@@ -8,9 +8,15 @@
 </head>
 <body>
   <header class="toolbar no-print" role="toolbar" aria-label="Exam editor controls">
-    <div class="toolbar__brand">
-      <span class="toolbar__title" data-i18n="app.title">Exam Template Editor</span>
-      <span class="toolbar__subtitle" data-i18n="app.subtitle">generic structure editor &amp; print preview</span>
+    <div class="toolbar__left">
+      <div class="toolbar__brand">
+        <span class="toolbar__title" data-i18n="app.title">Exam Template Editor</span>
+        <span class="toolbar__subtitle" data-i18n="app.subtitle">generic structure editor &amp; print preview</span>
+      </div>
+      <div class="toolbar__project" id="project-status" aria-live="polite">
+        <span class="toolbar__project-label" data-i18n="status.currentProject">Current Project:</span>
+        <span id="project-status-name" class="toolbar__project-name">Unsaved draft</span>
+      </div>
     </div>
     <div class="toolbar__actions">
       <label class="toolbar__select">
@@ -31,12 +37,11 @@
           <option value="zh" selected>中文</option>
         </select>
       </label>
-      <button type="button" id="btn-save" class="btn btn--secondary" data-i18n="toolbar.save">Save</button>
+      <button type="button" id="btn-open-project" class="btn btn--secondary" data-i18n="toolbar.openProject">Open Project</button>
+      <button type="button" id="btn-save-project" class="btn btn--secondary" data-i18n="toolbar.saveProject">Save Project</button>
+      <button type="button" id="btn-save-project-as" class="btn btn--secondary" data-i18n="toolbar.saveProjectAs">Save Project As</button>
+      <button type="button" id="btn-save-draft" class="btn btn--secondary" data-i18n="toolbar.saveDraft">Save Draft</button>
       <button type="button" id="btn-reset" class="btn btn--secondary" data-i18n="toolbar.reset">Reset to Default</button>
-      <button type="button" id="btn-export" class="btn btn--secondary" data-i18n="toolbar.export">Export JSON</button>
-      <button type="button" id="btn-save-folder" class="btn btn--secondary" data-i18n="toolbar.saveAsFolder">Save As Folder</button>
-      <button type="button" id="btn-import" class="btn btn--secondary" data-i18n="toolbar.import">Import JSON</button>
-      <input type="file" id="import-file" class="is-hidden" accept=".json,application/json">
       <button type="button" id="btn-print" class="btn btn--primary" data-i18n="toolbar.print">Print / Save as PDF</button>
       <button type="button" id="btn-answer-key" class="btn btn--secondary" aria-pressed="false" data-i18n="toolbar.answerKey">
         Toggle Answer Key Preview

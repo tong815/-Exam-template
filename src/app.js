@@ -9,6 +9,10 @@
   let skipEditorRender = false;
   let paperStyleEl = null;
 
+  let currentFileHandle = null;
+  let currentFileName = null;
+  let isDirty = false;
+
   const examRoot = document.getElementById("exam-root");
   const editorRoot = document.getElementById("editor-root");
 
@@ -41,6 +45,45 @@
     paperStyleEl.textContent = `@media print { @page { size: ${pageSize}; margin: ${margin}; } }`;
   }
 
+  function syncProjectStatus() {
+    const el = document.getElementById("project-status-name");
+    if (!el) return;
+
+    if (currentFileName) {
+      el.textContent = isDirty ? `${currentFileName} *` : currentFileName;
+    } else {
+      el.textContent = isDirty
+        ? `${ET.t("status.unsavedDraft")} *`
+        : ET.t("status.unsavedDraft");
+    }
+    el.classList.toggle("is-modified", isDirty);
+    el.setAttribute("title", isDirty ? ET.t("status.modifiedHint") : "");
+  }
+
+  function markDirty() {
+    if (!isDirty) {
+      isDirty = true;
+      syncProjectStatus();
+    }
+  }
+
+  function clearDirty() {
+    isDirty = false;
+    syncProjectStatus();
+  }
+
+  function clearProjectFile() {
+    currentFileHandle = null;
+    currentFileName = null;
+    syncProjectStatus();
+  }
+
+  function setProjectFile(fileHandle, fileName) {
+    currentFileHandle = fileHandle;
+    currentFileName = fileName;
+    syncProjectStatus();
+  }
+
   function syncToolbar() {
     const paperSelect = document.getElementById("paper-size");
     const profileSelect = document.getElementById("exam-profile");
@@ -58,6 +101,7 @@
 
     applyPaperSize(state.meta.paperSize || "letter");
     ET.applyToolbarI18n();
+    syncProjectStatus();
     document.title = ET.t("app.documentTitle", {
       title: state.meta.testTitle || "Exam",
     });
@@ -67,6 +111,12 @@
     if (lang === ET.currentLanguage) return;
     ET.setLanguage(lang);
     refreshAll({ rerenderEditor: true });
+  }
+
+  function guardFileSystemAccess() {
+    if (ET.supportsFileSystemAccess()) return true;
+    showToast("toast.projectFileUnsupported");
+    return false;
   }
 
   // ---------------------------------------------------------------------------
@@ -122,6 +172,7 @@
     if (path.endsWith("__questionCount")) {
       const match = path.match(/^parts\.(\d+)\.__questionCount$/);
       if (match) handleQuestionCount(Number(match[1]), rawValue);
+      markDirty();
       refreshAll({ rerenderEditor: true });
       return;
     }
@@ -143,6 +194,7 @@
             .map((s) => s.trim())
             .filter(Boolean);
         }
+        markDirty();
         refreshAll({ rerenderEditor: false });
         return;
       }
@@ -162,6 +214,7 @@
             /* keep last valid value while user edits JSON */
           }
         }
+        markDirty();
         refreshAll({ rerenderEditor: false });
         return;
       }
@@ -179,6 +232,7 @@
           q.options[idx].text = value;
           q.options[idx].key = q.options[idx].key || key;
         }
+        markDirty();
         refreshAll({ rerenderEditor: false });
         return;
       }
@@ -199,6 +253,7 @@
       if (path === "bonus.enabled") state.settings.showBonus = !!value;
     }
 
+    markDirty();
     refreshAll({ rerenderEditor: needsEditorRerender(path) });
   }
 
@@ -218,6 +273,7 @@
         questions: [ET.createQuestion({ stem: `[PLACEHOLDER: Question 1]` })],
       })
     );
+    markDirty();
     refreshAll({ rerenderEditor: true });
     showToast("toast.partAdded");
   }
@@ -226,6 +282,8 @@
     activeProfileId = profileId;
     try {
       state = await ET.loadExamProfile(profileId);
+      clearProjectFile();
+      clearDirty();
       applyPaperSize(state.meta.paperSize || "letter");
       refreshAll({ rerenderEditor: true });
       showToast("toast.loadedProfile", { label: ET.getProfileById(profileId).label });
@@ -241,22 +299,80 @@
     loadProfile(activeProfileId);
   }
 
-  async function saveAsFolder() {
+  async function openProject() {
+    if (!guardFileSystemAccess()) return;
+    if (isDirty && !confirm(ET.t("confirm.openProjectDirty"))) return;
+
     try {
-      const result = await ET.saveExamToDirectory(state);
+      const result = await ET.openProjectFile();
       if (result.ok) {
-        showToast("toast.savedToFolder");
+        state = result.exam;
+        activeProfileId = "project";
+        setProjectFile(result.fileHandle, result.fileName);
+        clearDirty();
+        applyPaperSize(state.meta.paperSize || "letter");
+        refreshAll({ rerenderEditor: true });
+        showToast("toast.projectOpened", { name: result.fileName });
       } else if (result.cancelled) {
-        showToast("toast.saveFolderCancelled");
+        showToast("toast.projectOpenCancelled");
       } else if (result.unsupported) {
-        showToast("toast.saveFolderUnsupported");
+        showToast("toast.projectFileUnsupported");
       } else {
-        showToast("toast.saveFolderFailed");
+        showToast("toast.projectOpenFailed");
       }
     } catch (err) {
       console.error(err);
-      showToast("toast.saveFolderFailed");
+      showToast("toast.projectOpenFailed");
     }
+  }
+
+  async function saveProject() {
+    if (!guardFileSystemAccess()) return;
+
+    if (!currentFileHandle) {
+      await saveProjectAs();
+      return;
+    }
+
+    try {
+      const result = await ET.saveProjectFile(currentFileHandle, state);
+      if (result.ok) {
+        clearDirty();
+        showToast("toast.projectSaved", { name: result.fileName });
+      } else {
+        showToast("toast.projectSaveFailed");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("toast.projectSaveFailed");
+    }
+  }
+
+  async function saveProjectAs() {
+    if (!guardFileSystemAccess()) return;
+
+    try {
+      const result = await ET.saveProjectFileAs(state);
+      if (result.ok) {
+        setProjectFile(result.fileHandle, result.fileName);
+        clearDirty();
+        showToast("toast.projectSaved", { name: result.fileName });
+      } else if (result.cancelled) {
+        showToast("toast.projectSaveCancelled");
+      } else if (result.unsupported) {
+        showToast("toast.projectFileUnsupported");
+      } else {
+        showToast("toast.projectSaveFailed");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("toast.projectSaveFailed");
+    }
+  }
+
+  function saveDraft() {
+    ET.saveToStorage(state, activeProfileId);
+    showToast("toast.savedDraft");
   }
 
   // ---------------------------------------------------------------------------
@@ -296,12 +412,11 @@
     const btnPrint = document.getElementById("btn-print");
     const btnAnswerKey = document.getElementById("btn-answer-key");
     const btnTeacherNotes = document.getElementById("btn-teacher-notes");
-    const btnSave = document.getElementById("btn-save");
+    const btnOpenProject = document.getElementById("btn-open-project");
+    const btnSaveProject = document.getElementById("btn-save-project");
+    const btnSaveProjectAs = document.getElementById("btn-save-project-as");
+    const btnSaveDraft = document.getElementById("btn-save-draft");
     const btnReset = document.getElementById("btn-reset");
-    const btnExport = document.getElementById("btn-export");
-    const btnSaveFolder = document.getElementById("btn-save-folder");
-    const btnImport = document.getElementById("btn-import");
-    const importFile = document.getElementById("import-file");
     const banner = document.getElementById("answer-key-banner");
     const paperSelect = document.getElementById("paper-size");
     const profileSelect = document.getElementById("exam-profile");
@@ -345,36 +460,17 @@
       btnTeacherNotes.setAttribute("aria-pressed", String(on));
     });
 
-    btnSave.addEventListener("click", () => {
-      ET.saveToStorage(state, activeProfileId);
-      showToast("toast.saved");
-    });
-
+    btnOpenProject.addEventListener("click", () => openProject());
+    btnSaveProject.addEventListener("click", () => saveProject());
+    btnSaveProjectAs.addEventListener("click", () => saveProjectAs());
+    btnSaveDraft.addEventListener("click", saveDraft);
     btnReset.addEventListener("click", resetToProfileDefault);
-    btnExport.addEventListener("click", () => {
-      ET.exportExamJson(state);
-      showToast("toast.exported");
-    });
 
-    btnSaveFolder.addEventListener("click", () => {
-      saveAsFolder();
-    });
-
-    btnImport.addEventListener("click", () => importFile.click());
-    importFile.addEventListener("change", async () => {
-      const file = importFile.files?.[0];
-      importFile.value = "";
-      if (!file) return;
-      try {
-        state = await ET.importExamJsonFile(file);
-        activeProfileId = "imported";
-        applyPaperSize(state.meta.paperSize || "letter");
-        refreshAll({ rerenderEditor: true });
-        showToast("toast.imported");
-      } catch (err) {
-        showToast("toast.importFailed");
-        console.error(err);
-      }
+    window.addEventListener("beforeunload", (event) => {
+      if (!isDirty) return;
+      event.preventDefault();
+      event.returnValue = ET.t("confirm.unsavedChanges");
+      return event.returnValue;
     });
   }
 
@@ -389,6 +485,8 @@
     const saved = ET.loadFromStorage(ET.createBlankExam());
     if (saved && saved.examId) {
       state = saved;
+      clearProjectFile();
+      isDirty = false;
       refreshAll({ rerenderEditor: true });
     } else {
       await loadProfile(activeProfileId);
@@ -405,8 +503,15 @@
       normalize: (raw, fb) => ET.normalizeExamData(raw, fb),
       refresh: refreshAll,
       loadProfile,
-      exportJson: () => ET.exportExamJson(state),
-      saveAsFolder: () => saveAsFolder(),
+      openProject,
+      saveProject,
+      saveProjectAs,
+      saveDraft,
+      getProjectInfo: () => ({
+        fileName: currentFileName,
+        isDirty,
+        hasFileHandle: !!currentFileHandle,
+      }),
       setPaperSize: applyPaperSize,
       setLanguage: switchLanguage,
       t: ET.t,

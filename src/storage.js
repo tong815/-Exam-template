@@ -1,5 +1,5 @@
 /**
- * localStorage persistence + JSON import/export + profile loading.
+ * localStorage draft persistence + project file I/O + profile loading.
  */
 (function (ET) {
   "use strict";
@@ -51,85 +51,118 @@
     return localStorage.getItem(ET.STORAGE_PROFILE_KEY) || "g11-functions";
   };
 
-  ET.exportExamJson = function (exam) {
-    const blob = new Blob([JSON.stringify(exam, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    const slug = (exam.meta?.testTitle || exam.examId || "exam").replace(/[^\w\-]+/g, "-").slice(0, 40);
-    a.href = url;
-    a.download = `${slug || "exam-data"}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  // ---------------------------------------------------------------------------
+  // File System Access API — project files
+  // ---------------------------------------------------------------------------
+
+  ET.supportsFileSystemAccess = function () {
+    return (
+      typeof window.showOpenFilePicker === "function" &&
+      typeof window.showSaveFilePicker === "function"
+    );
   };
 
-  ET.importExamJsonFile = function (file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const data = JSON.parse(reader.result);
-          resolve(ET.normalizeExamData(data, ET.createBlankExam()));
-        } catch (err) {
-          reject(err);
-        }
-      };
-      reader.onerror = () => reject(reader.error);
-      reader.readAsText(file);
-    });
+  ET.JSON_FILE_PICKER_TYPES = [
+    {
+      description: "Exam JSON",
+      accept: { "application/json": [".json"] },
+    },
+  ];
+
+  ET.getDefaultProjectFileName = function (exam) {
+    const id = exam?.examId;
+    if (id && /^[\w\-]+$/.test(String(id))) {
+      return `${id}.json`;
+    }
+    return "exam-data.json";
   };
 
-  ET.supportsDirectoryPicker = function () {
-    return typeof window.showDirectoryPicker === "function";
+  ET.parseExamJsonText = function (text) {
+    const parsed = JSON.parse(text);
+    const migrated = ET.migrateExamData(parsed);
+    return ET.normalizeExamData(migrated, ET.createBlankExam());
   };
 
-  ET.writeTextFileToDirectory = async function (dirHandle, fileName, contents) {
-    const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+  ET.writeToFileHandle = async function (fileHandle, contents) {
     const writable = await fileHandle.createWritable();
     await writable.write(contents);
     await writable.close();
   };
 
-  ET.buildProjectFolderReadme = function (exam) {
-    const p = exam.profile || {};
-    const m = exam.meta || {};
-    const exportedAt = new Date().toISOString();
-    const profileLine = [p.grade, p.subject, p.courseCode, p.courseName].filter(Boolean).join(" / ");
-
-    return `# Exam Project
-
-- **examId:** ${exam.examId || ""}
-- **profile:** ${profileLine || "(not set)"}
-- **testTitle:** ${m.testTitle || ""}
-- **exportedAt:** ${exportedAt}
-
-## How to reopen
-
-1. Open \`index.html\` in Exam Template Editor
-2. Click **Import JSON**
-3. Select \`exam-data.json\` from this folder
-`;
-  };
-
   /**
-   * Save current exam to a user-selected folder (File System Access API).
-   * @returns {Promise<{ok:boolean, fileName?:string, cancelled?:boolean, unsupported?:boolean, error?:string}>}
+   * Open an exam project file from disk.
    */
-  ET.saveExamToDirectory = async function (exam) {
-    if (!ET.supportsDirectoryPicker()) {
+  ET.openProjectFile = async function () {
+    if (!ET.supportsFileSystemAccess()) {
       return { ok: false, unsupported: true };
     }
 
     try {
-      const dirHandle = await window.showDirectoryPicker({ mode: "readwrite" });
-      const json = JSON.stringify(exam, null, 2);
-      await ET.writeTextFileToDirectory(dirHandle, "exam-data.json", json);
-      await ET.writeTextFileToDirectory(dirHandle, "README.md", ET.buildProjectFolderReadme(exam));
-      return { ok: true, fileName: "exam-data.json" };
+      const [fileHandle] = await window.showOpenFilePicker({
+        types: ET.JSON_FILE_PICKER_TYPES,
+        multiple: false,
+      });
+      const file = await fileHandle.getFile();
+      const text = await file.text();
+      const exam = ET.parseExamJsonText(text);
+      return {
+        ok: true,
+        exam,
+        fileHandle,
+        fileName: fileHandle.name,
+      };
     } catch (err) {
       if (err && err.name === "AbortError") {
         return { ok: false, cancelled: true };
       }
-      console.error("saveExamToDirectory failed:", err);
+      console.error("openProjectFile failed:", err);
+      return { ok: false, error: err?.message || String(err) };
+    }
+  };
+
+  /**
+   * Overwrite an existing project file handle.
+   */
+  ET.saveProjectFile = async function (fileHandle, exam) {
+    if (!fileHandle) {
+      return { ok: false, noFile: true };
+    }
+
+    try {
+      const json = JSON.stringify(exam, null, 2);
+      await ET.writeToFileHandle(fileHandle, json);
+      return { ok: true, fileName: fileHandle.name };
+    } catch (err) {
+      console.error("saveProjectFile failed:", err);
+      return { ok: false, error: err?.message || String(err) };
+    }
+  };
+
+  /**
+   * Save project to a new file location (Save Project As).
+   */
+  ET.saveProjectFileAs = async function (exam) {
+    if (!ET.supportsFileSystemAccess()) {
+      return { ok: false, unsupported: true };
+    }
+
+    try {
+      const fileHandle = await window.showSaveFilePicker({
+        suggestedName: ET.getDefaultProjectFileName(exam),
+        types: ET.JSON_FILE_PICKER_TYPES,
+      });
+      const json = JSON.stringify(exam, null, 2);
+      await ET.writeToFileHandle(fileHandle, json);
+      return {
+        ok: true,
+        fileHandle,
+        fileName: fileHandle.name,
+      };
+    } catch (err) {
+      if (err && err.name === "AbortError") {
+        return { ok: false, cancelled: true };
+      }
+      console.error("saveProjectFileAs failed:", err);
       return { ok: false, error: err?.message || String(err) };
     }
   };

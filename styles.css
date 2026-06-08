@@ -63,10 +63,42 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+.toolbar__left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  min-width: 0;
+}
+
 .toolbar__brand {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
+}
+
+.toolbar__project {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.8125rem;
+  opacity: 0.92;
+  min-width: 0;
+}
+
+.toolbar__project-label {
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.toolbar__project-name {
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.toolbar__project-name.is-modified {
+  color: #fbbf24;
 }
 
 .toolbar__title {
