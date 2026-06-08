@@ -1,235 +1,257 @@
-# G11 Mathematics / Functions — Exam Template Kit
+# Exam Template — Generic Editor & Print Preview
 
-可复用的 **Grade 11 Functions (MCR3U)** 试卷模板，风格参考加拿大安省高中数学测评，并保留清晰分区便于出卷与阅卷。
+通用本地考试模板工具：**通用编辑器 / 预览 / 打印** 与 **具体考试内容（Exam Profile）** 分离。
 
----
-
-## 文件说明
-
-| 文件 | 用途 | 主要读者 |
-|:-----|:-----|:---------|
-| `index.html` | 本地网页编辑器 + 试卷预览入口 | 教师 |
-| `app.js` | 试卷数据结构、编辑器逻辑、预览渲染 | 教师 |
-| `styles.css` | 屏幕布局、编辑器样式、打印样式 | 教师 |
-| `exam-template.md` | 学生试卷正文（题目占位 + 答题区） | 学生 |
-| `answer-key-template.md` | 参考答案、得分点、常见扣分 | 教师 |
-| `rubric-template.md` | Ontario KTCA 四类评价标准 | 教师 |
-| `README.md` | 使用说明（本文件） | 教师 |
+当前内置示例：**G11 Functions (MCR3U)**，位于 `exams/g11-functions/`。同一套工具可用于其他年级、科目。
 
 ---
 
-## 试卷结构一览
+## 项目结构
 
-| Part | 内容 | 题量 | 分值 |
-|:-----|:-----|:-----|:-----|
-| **A** | Multiple Choice | 10 | 10 |
-| **B** | Short Answer / Fill in the Blank | 8 | 16 |
-| **C** | Communication / Reasoning | 3 | 12 |
-| **D** | Problem Solving / Applications | 4 | 6 + 6 + 8 + 8 = 28 |
-| **Bonus** | 可选加分题 | 1 | 自定 |
-| | **Total** | **25 (+bonus)** | **66** |
+```text
+Exam-template/
+├─ index.html              # 入口（双击打开，或用 Live Server）
+├─ styles.css              # 屏幕布局 + 打印样式
+├─ src/                    # 通用逻辑（不含年级/科目硬编码）
+│  ├─ app.js               # 入口：状态、控件、事件
+│  ├─ editor.js            # 编辑器 UI
+│  ├─ renderer.js          # 试卷预览渲染
+│  ├─ storage.js           # localStorage、导入/导出、Profile 加载
+│  ├─ schema.js            # 通用 examData 结构与计算
+│  └─ templates.js         # 空白默认模板 + Profile 注册表
+│
+├─ exams/                  # 具体考试内容层（按考试分文件夹）
+│  └─ g11-functions/
+│     ├─ exam-template.md
+│     ├─ answer-key-template.md
+│     ├─ rubric-template.md
+│     └─ exam-data.json    # G11 示例骨架（编辑器可加载）
+│
+└─ README.md
+```
+
+### 两层架构
+
+| 层 | 位置 | 职责 |
+|:---|:-----|:-----|
+| **通用模板层** | `src/`, `index.html`, `styles.css` | 数据结构、编辑器、预览、打印、JSON 导入导出 |
+| **考试内容层** | `exams/<profile>/` | 某年级/科目的 markdown 模板、`exam-data.json`、rubric 等 |
+
+通用代码中**不写死** Grade 11、Functions、MCR3U、Ontario、KTCA 等；这些只出现在 `exams/g11-functions/` 等内容文件中。
 
 ---
 
-## Exam Editor v1 使用说明
+## 打开方式
 
-本地结构编辑器，用于确定试卷骨架（题量、分值、答题行数），**不自动出题**。确定结构后可导出 JSON，供下一阶段填入正式题目。
+### 方式 A：直接双击（可用）
 
-### 打开方式
+双击 `index.html`。编辑器与预览可正常使用；**Load Exam Profile** 在无法 `fetch` 本地 JSON 时会自动使用内置 `defaultG11FunctionsExamData` 回退数据。
 
-双击 `index.html` 即可在浏览器中打开（无需安装、无需构建）。
+### 方式 B：VS Code Live Server（推荐）
 
-### 界面布局
+若希望从 `exams/g11-functions/exam-data.json` **文件**加载（而非内置回退）：
+
+1. 在 VS Code 中安装 **Live Server**
+2. 右键 `index.html` → **Open with Live Server**
+3. 工具栏 **Profile → G11 Functions** 将从 JSON 文件加载
+
+---
+
+## 通用 examData 结构（schema v1.0）
+
+```json
+{
+  "schemaVersion": "1.0",
+  "examId": "g11-functions-unit-test",
+  "profile": {
+    "grade": "Grade 11",
+    "subject": "Mathematics",
+    "courseCode": "MCR3U",
+    "courseName": "Functions",
+    "region": "Ontario",
+    "language": "en"
+  },
+  "meta": {
+    "schoolName": "",
+    "testTitle": "",
+    "studentNameLabel": "Student Name",
+    "dateLabel": "Date",
+    "timeAllowed": "",
+    "teacher": "",
+    "calculatorPolicy": "ALLOWED",
+    "paperSize": "letter"
+  },
+  "instructions": [],
+  "parts": [],
+  "bonus": {},
+  "rubric": {},
+  "settings": {
+    "showMarkDistribution": true,
+    "showInstructions": true,
+    "showBonus": false,
+    "autoNumberQuestions": true
+  }
+}
+```
+
+### Part（通用）
+
+- 不限于 A/B/C/D；使用 `id` + `label`（显示用，如 `A`、`1`、`I`）
+- 每 Part 含 `questions[]` 数组
+
+### Question 类型
+
+`multiple-choice` · `short-answer` · `long-answer` · `communication` · `problem-solving` · `matching` · `true-false` · `custom`
+
+```json
+{
+  "id": "q-001",
+  "number": 1,
+  "type": "multiple-choice",
+  "stem": "",
+  "marks": 1,
+  "options": [{ "key": "A", "text": "" }],
+  "answerSpace": { "type": "lines", "lines": 2 },
+  "answerKey": "",
+  "teacherNote": "",
+  "tags": []
+}
+```
+
+---
+
+## 编辑器使用说明
+
+### 界面
 
 | 区域 | 说明 |
 |:-----|:-----|
-| **顶部工具栏** | 保存、重置、导入/导出 JSON、打印、答案预览、教师备注 |
-| **左侧 Editor Panel** | 编辑考试元信息、各 Part 结构、每道题占位字段 |
-| **右侧 Exam Preview** | 实时预览学生卷排版 |
+| **Toolbar** | Profile、纸张、保存、重置、导入/导出、打印、答案/备注切换 |
+| **左侧 Editor** | Profile、Meta、显示设置、Part 结构、每题字段 |
+| **右侧 Preview** | 学生卷实时预览 |
 
-窄屏（手机）下自动改为上下排列；**打印时只输出右侧试卷**，左侧编辑器与工具栏自动隐藏。
+打印时**仅输出右侧试卷**；工具栏与编辑器自动隐藏。
 
-### 修改各 Part 题量
+### Load Exam Profile
 
-1. 在左侧 **Part Structure** 找到对应 Part（A / B / C / D）
-2. 勾选 **Enabled** 启用该部分（取消则不计入题号与总分）
-3. 修改 **# Questions** 数值
-4. 右侧预览立即更新；题号在已启用的 Part 之间**自动连续**（例如 A 5 题 + B 6 题 → B 从 Q6 开始）
+工具栏 **Profile** 下拉：
 
-增加题量会追加占位题；减少题量会删除末尾题目（已填内容会丢失）。
+| Profile | 说明 |
+|:--------|:-----|
+| **Blank Template** | 通用空白骨架（1 个 Section） |
+| **G11 Functions** | 加载 `exams/g11-functions/exam-data.json`（或内置回退） |
 
-### 修改每题分值与答题空间
+切换 Profile 会提示确认（避免误覆盖未导出编辑）。
 
-**批量默认值（Part 级）：**
+### 修改题量与分值
 
-- **Default marks** — 该 Part 新题的默认分值
-- **Default solution lines** — Part C / D 新题的默认答题行数
+1. 在 **Part Structure** 找到对应 Part
+2. 勾选 **Enabled** / 修改 **# Questions**
+3. 题号在已启用 Part 间**自动连续**（`settings.autoNumberQuestions`）
+4. **Default marks** / **Default answer lines** 影响新题；单题可在题目列表中覆盖
 
-**单题覆盖（题目列表）：**
+**Total Marks** 自动计算（不含 Bonus 加分计入总分表）。
 
-- **Marks** — 覆盖默认分值（Part D 可设为 6, 6, 8, 8 等不等分）
-- **Solution lines** — 覆盖答题区行数
-- **Stem** — 题干占位文字
-- **Type** — 题型（选择题 / 简答 / Communication / Problem Solving）
-- **Option A–D** — 选择题选项占位
-- **Answer key / Teacher note** — 教师用占位（预览中可通过 Toggle 显示）
+### 保存 / 导入 / 导出 JSON
 
-**Total Marks** 在 Exam Meta 区只读显示，随各 Part 小题分值**自动求和**（不含 Bonus）。
-
-### 保存 / 导出 JSON
-
-| 按钮 | 作用 |
+| 操作 | 说明 |
 |:-----|:-----|
-| **Save** | 立即写入浏览器 `localStorage`（每次编辑也会自动保存） |
-| **Export JSON** | 下载 `exam-data.json`，包含完整编辑器配置 |
-| **Import JSON** | 选择本地 JSON 文件载入，恢复编辑器与预览 |
-| **Reset to Default** | 恢复默认 66 分结构（A10/B8/C3/D4 + Bonus） |
-
-导出 JSON 可用于：
-
-- 备份当前骨架
-- 发给 ChatGPT 生成正式题干后，再由 Cursor 按同一结构填回
-- 在不同电脑间迁移（Import JSON）
-
-### 从 JSON 恢复
-
-1. 点击 **Import JSON**
-2. 选择之前导出的 `exam-data.json`
-3. 编辑器与右侧预览同步更新，并写入 `localStorage`
+| **自动保存** | 每次编辑写入 `localStorage`（键：`exam-template-editor-v1`） |
+| **Save** | 手动触发保存 |
+| **Export JSON** | 下载当前 `exam-data.json` |
+| **Import JSON** | 从本地 JSON 恢复（覆盖当前编辑状态） |
+| **Reset to Default** | 恢复当前 Profile 的默认数据 |
 
 ### 打印 PDF
 
-1. 在右侧确认预览排版无误
-2. 工具栏选择 **Paper**（Letter 默认，加拿大常用；也可选 A4）
-3. 点击 **Print / Save as PDF**
-4. 在系统打印对话框中选择「另存为 PDF」或「Microsoft Print to PDF」
-
-打印设置建议：边距使用默认；缩放 100%；勾选「背景图形」可保留表格浅灰底纹（可选）。
-
-### 其他工具栏功能
-
-- **Toggle Answer Key Preview** — 预览每题答案占位（打印时自动隐藏）
-- **Toggle Teacher Notes** — 显示教师备注（打印时自动隐藏）
+1. 右侧确认预览
+2. 选择 **Letter**（加拿大常用）或 **A4**
+3. **Print / Save as PDF** → 系统对话框选「另存为 PDF」
 
 ---
 
-## 如何生成一份新试卷（Markdown 模板方式）
+## 新建一个考试 Profile
 
-### 1. 复制并重命名
+例如新建 **G12 Advanced Functions**：
+
+### 1. 创建文件夹
 
 ```text
-复制 exam-template.md
-重命名为例如：unit-3-quadratic-functions-test.md
+exams/g12-advanced-functions/
+├─ exam-data.json
+├─ exam-template.md        # 可选：Markdown 参考模板
+├─ answer-key-template.md  # 可选
+└─ rubric-template.md      # 可选
 ```
 
-建议同步复制：
-
-```text
-answer-key-template.md  →  unit-3-quadratic-functions-answer-key.md
-rubric-template.md      →  unit-3-quadratic-functions-rubric.md
-```
-
-### 2. 替换占位符
-
-在试卷与答案卷中搜索并替换：
-
-| 占位符 | 替换为 |
-|:-------|:-------|
-| `[SCHOOL NAME]` | 学校名称 |
-| `[UNIT / TOPIC TEST TITLE]` | 如 *Unit 3: Quadratic Functions* |
-| `[TEACHER NAME]` | 教师姓名 |
-| `[e.g., 75 minutes]` | 考试时长 |
-| `[ALLOWED / NOT ALLOWED]` | 计算器政策 |
-| `[PLACEHOLDER: ...]` | 实际题干与选项 |
-| `[OPTION A]` 等 | 选择题选项 |
-| `[+___]` | 加分题分值（若使用） |
-
-### 3. 调整总分（如需要）
-
-默认总分 **66**。若修改分值：
-
-1. 更新标题区 **Total Marks**
-2. 更新 **Mark Distribution Summary** 表格
-3. 更新每题旁的 **[n]** 标记
-4. 同步修改 `answer-key-template.md` 与 `rubric-template.md` 中的总分与分值表
-
-**保持分值一致：** 各部分小计之和必须等于 Total Marks。
-
-### 4. 填写答案卷
-
-按 Part A → B → C → D 顺序：
-
-- **Part A：** 填正确答案表（A/B/C/D）
-- **Part B：** 填最终答案与可接受变体
-- **Part C / D：** 写主要步骤、分步给分、常见错误
-
-### 5. 标注评价类别（可选）
-
-在 `rubric-template.md` 的 **Per-Question Rubric Tags** 表中标注每题对应的 K / T / C / A，便于成绩分析与 report card。
-
----
-
-## 期中 / 期末建议
-
-出 **期末复习卷** 或 **cumulative exam** 时：
-
-- 在 Part A/B 中覆盖多个单元核心概念
-- Part C 增加跨主题比较（如 linear vs. exponential growth）
-- Part D 至少一题综合建模、一题图像与参数分析
-- Instructions 中写明 **cumulative topics** 范围
-- Answer key 的 **Topic / Skill Tag** 列按单元标注，方便统计薄弱点
-
----
-
-## 导出 Word / PDF
-
-本模板为 Markdown，便于 Pandoc 或 VS Code / Typora 导出：
-
-1. **保留表格** — 分值表在 Word 中仍清晰
-2. **Solution space** — `blockquote`（`>`）在导出后可视作答题框；也可改为表格或下划线
-3. **数学公式** — 使用 `$...$` 或 `$$...$$`；导出前确认公式渲染正常
-4. **分页** — 在 Part C / D 大题前可插入 `---` 或 Word 分页符
-
-### Pandoc 示例（可选）
+### 2. 复制并修改 exam-data.json
 
 ```bash
-pandoc unit-3-test.md -o unit-3-test.pdf
-pandoc unit-3-test.md -o unit-3-test.docx
+# 从 G11 复制作为起点
+cp exams/g11-functions/exam-data.json exams/g12-advanced-functions/exam-data.json
 ```
 
+修改：
+
+- `examId` → 如 `g12-advanced-functions-midterm`
+- `profile` → grade、courseCode、courseName 等
+- `meta.testTitle`、`instructions`
+- `parts` → 题量、题型、分值
+- `rubric` → 该考试适用的评价框架（若有）
+
+### 3. 注册 Profile（可选，便于工具栏加载）
+
+在 `src/templates.js` 的 `EXAM_PROFILES` 数组追加：
+
+```javascript
+{
+  id: "g12-advanced-functions",
+  label: "G12 Advanced Functions",
+  dataPath: "exams/g12-advanced-functions/exam-data.json",
+  getData: function () {
+    return ET.normalizeExamData(/* 内置 fallback 对象 */, ET.createBlankExam());
+  },
+}
+```
+
+也可跳过注册，直接 **Import JSON** 载入 `exam-data.json`。
+
+### 4. 工作流建议
+
+1. 在编辑器中搭好骨架（题量、分值、答题行数）
+2. **Export JSON**
+3. 将 JSON 交给 ChatGPT / 其他工具生成正式题干
+4. 用 Cursor 按同一 JSON 结构填回 `stem`、`options`、`answerKey`
+5. **Import JSON** 或更新 `exams/.../exam-data.json` 后重新加载 Profile
+6. 打印 PDF 或继续用 Markdown 模板出卷
+
 ---
 
-## 出题检查清单
+## G11 Functions 示例（当前）
 
-出卷前快速核对：
+| Part | 内容 | 题量 | 分值 |
+|:-----|:-----|:-----|:-----|
+| A | Multiple Choice | 10 | 10 |
+| B | Short Answer | 8 | 16 |
+| C | Communication / Reasoning | 3 | 12 |
+| D | Problem Solving | 4 | 6+6+8+8 = 28 |
+| Bonus | 可选 | 1 | 自定 |
+| | **Total** | **25** | **66** |
 
-- [ ] 标题区信息完整（学校、课程、日期、时长、总分、教师）
-- [ ] Instructions 中计算器政策已确定
-- [ ] 各部分题号连续（1–25，Bonus 另计）
-- [ ] 分值小计：10 + 16 + 12 + 28 = 66
-- [ ] Part D 包含：建模、图像、参数、应用四类题型占位已替换为实题
-- [ ] 答案卷与试卷题号、分值一致
-- [ ] Rubric 中 KTCA 标签已更新
-- [ ] 未误留 `[PLACEHOLDER]` 给学生卷
-
----
-
-## 定制建议
-
-| 需求 | 修改位置 |
-|:-----|:---------|
-| 增加选择题 | Part A 题量 + Mark Distribution 表 |
-| 加长答题区 | 各题 `Solution space` blockquote 行数 |
-| 禁用 Bonus | 删除 Bonus 节或注明 N/A |
-| 双语试卷 | 题干保持英文；Instructions 可加中文副标题 |
-| IA / 过程分加重 | 提高 Part C/D 分值，相应减少 Part A |
+Markdown 模板与 Ontario KTCA rubric 说明见 `exams/g11-functions/`。
 
 ---
 
-## 许可与复用
+## 开发说明
 
-本模板为个人教学用途的结构框架，可自由修改、复制、分发给同事。填写的具体题目内容版权归出题教师所有。
+- 纯原生 HTML / CSS / JS，无构建工具
+- 模块通过 `window.ExamToolkit` 命名空间挂载，兼容 `file://`
+- 调试：`window.ExamToolkitAPI.getState()` / `getView()`
 
 ---
 
-*Last updated: Exam Editor v1 — Grade 11 Functions / MCR3U*
+## 许可
+
+通用框架可自由修改复用；`exams/` 下具体题目内容版权归出题教师所有。
+
+*Last updated: Generic Exam Template — schema v1.0*

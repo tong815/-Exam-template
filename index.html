@@ -3,16 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>G11 Functions — Exam Editor &amp; Preview</title>
+  <title>Exam Template — Editor &amp; Preview</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="toolbar no-print" role="toolbar" aria-label="Exam editor controls">
     <div class="toolbar__brand">
-      <span class="toolbar__title">G11 Exam Editor</span>
-      <span class="toolbar__subtitle">v1 — structure editor &amp; print preview</span>
+      <span class="toolbar__title">Exam Template Editor</span>
+      <span class="toolbar__subtitle">generic structure editor &amp; print preview</span>
     </div>
     <div class="toolbar__actions">
+      <label class="toolbar__select">
+        Profile
+        <select id="exam-profile" aria-label="Load exam profile"></select>
+      </label>
       <label class="toolbar__select">
         Paper
         <select id="paper-size" aria-label="Paper size">
@@ -48,6 +52,11 @@
 
   <div id="toast" class="toast no-print is-hidden" role="status"></div>
 
-  <script src="app.js"></script>
+  <script src="src/schema.js"></script>
+  <script src="src/templates.js"></script>
+  <script src="src/storage.js"></script>
+  <script src="src/renderer.js"></script>
+  <script src="src/editor.js"></script>
+  <script src="src/app.js"></script>
 </body>
 </html>

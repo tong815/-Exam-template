@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "1.0",
+  "examId": "g11-functions-unit-test",
+  "profile": {
+    "grade": "Grade 11",
+    "subject": "Mathematics",
+    "courseCode": "MCR3U",
+    "courseName": "Functions",
+    "region": "Ontario",
+    "language": "en"
+  },
+  "meta": {
+    "schoolName": "[SCHOOL NAME]",
+    "testTitle": "[UNIT / TOPIC TEST TITLE]",
+    "studentNameLabel": "Student Name",
+    "dateLabel": "Date",
+    "timeAllowed": "75 minutes",
+    "teacher": "[TEACHER NAME]",
+    "calculatorPolicy": "ALLOWED",
+    "paperSize": "letter"
+  },
+  "instructions": [
+    "Show all work for full marks. A correct final answer without supporting work may receive partial or no credit.",
+    "Calculators: ALLOWED / NOT ALLOWED — confirm policy before the test.",
+    "Round decimal answers to 2 decimal places unless otherwise stated.",
+    "Clearly state restrictions, domain, and range when required.",
+    "Write legibly. Use proper mathematical notation (e.g. f(x), ℝ).",
+    "Manage your time. Marks are shown in [ ] beside each question."
+  ],
+  "parts": [
+    {
+      "id": "part-a",
+      "label": "A",
+      "enabled": true,
+      "title": "Multiple Choice",
+      "description": "Choose the best answer. Write the letter (A, B, C, or D) on the line provided.",
+      "defaultQuestionType": "multiple-choice",
+      "defaultMarks": 1,
+      "defaultAnswerSpace": { "type": "blank", "lines": 0 },
+      "pageBreakBefore": false,
+      "questions": [
+        { "id": "g11-a-q1", "type": "multiple-choice", "marks": 1, "stem": "[PLACEHOLDER: domain of a rational function, transformation, or exponent rule]", "options": [{ "key": "A", "text": "[OPTION A]" }, { "key": "B", "text": "[OPTION B]" }, { "key": "C", "text": "[OPTION C]" }, { "key": "D", "text": "[OPTION D]" }], "answerKey": "[A/B/C/D]", "teacherNote": "教师备注：替换题干与干扰项后检查唯一正确答案。" },
+        { "id": "g11-a-q2", "type": "multiple-choice", "marks": 1, "stem": "[PLACEHOLDER: identifying function type from a graph]", "options": [{ "key": "A", "text": "[OPTION A]" }, { "key": "B", "text": "[OPTION B]" }, { "key": "C", "text": "[OPTION C]" }, { "key": "D", "text": "[OPTION D]" }], "answerKey": "[A/B/C/D]" },
+        { "id": "g11-a-q3", "type": "multiple-choice", "marks": 1, "stem": "[PLACEHOLDER: evaluating a composite function]", "options": [{ "key": "A", "text": "[OPTION A]" }, { "key": "B", "text": "[OPTION B]" }, { "key": "C", "text": "[OPTION C]" }, { "key": "D", "text": "[OPTION D]" }], "answerKey": "[A/B/C/D]" },
+        { "id": "g11-a-q4", "type": "multiple-choice", "marks": 1, "stem": "[PLACEHOLDER: solving a simple exponential equation]", "options": [{ "key": "A", "text": "[OPTION A]" }, { "key": "B", "text": "[OPTION B]" }, { "key": "C", "text": "[OPTION C]" }, { "key": "D", "text": "[OPTION D]" }], "answerKey": "[A/B/C/D]" },
+        { "id": "g11-a-q5", "type": "multiple-choice", "marks": 1, "stem": "[PLACEHOLDER: determining the range of a quadratic]", "options": [{ "key": "A", "text": "[OPTION A]" }, { "key": "B", "text": "[OPTION B]" }, { "key": "C", "text": "[OPTION C]" }, { "key": "D", "text": "[OPTION D]" }], "answerKey": "[A/B/C/D]" },
+        { "id": "g11-a-q6", "type": "multiple-choice", "marks": 1, "stem": "[PLACEHOLDER: vertical asymptote of a rational function]", "options": [{ "key": "A", "text": "[OPTION A]" }, { "key": "B", "text": "[OPTION B]" }, { "key": "C", "text": "[OPTION C]" }, { "key": "D", "text": "[OPTION D]" }], "answerKey": "[A/B/C/D]" },
+        { "id": "g11-a-q7", "type": "multiple-choice", "marks": 1, "stem": "[PLACEHOLDER: effect of a horizontal translation]", "options": [{ "key": "A", "text": "[OPTION A]" }, { "key": "B", "text": "[OPTION B]" }, { "key": "C", "text": "[OPTION C]" }, { "key": "D", "text": "[OPTION D]" }], "answerKey": "[A/B/C/D]" },
+        { "id": "g11-a-q8", "type": "multiple-choice", "marks": 1, "stem": "[PLACEHOLDER: inverse of a linear function]", "options": [{ "key": "A", "text": "[OPTION A]" }, { "key": "B", "text": "[OPTION B]" }, { "key": "C", "text": "[OPTION C]" }, { "key": "D", "text": "[OPTION D]" }], "answerKey": "[A/B/C/D]" },
+        { "id": "g11-a-q9", "type": "multiple-choice", "marks": 1, "stem": "[PLACEHOLDER: degree vs. leading coefficient behaviour]", "options": [{ "key": "A", "text": "[OPTION A]" }, { "key": "B", "text": "[OPTION B]" }, { "key": "C", "text": "[OPTION C]" }, { "key": "D", "text": "[OPTION D]" }], "answerKey": "[A/B/C/D]" },
+        { "id": "g11-a-q10", "type": "multiple-choice", "marks": 1, "stem": "[PLACEHOLDER: restrictions on the domain of a root function]", "options": [{ "key": "A", "text": "[OPTION A]" }, { "key": "B", "text": "[OPTION B]" }, { "key": "C", "text": "[OPTION C]" }, { "key": "D", "text": "[OPTION D]" }], "answerKey": "[A/B/C/D]" }
+      ]
+    },
+    {
+      "id": "part-b",
+      "label": "B",
+      "enabled": true,
+      "title": "Short Answer / Fill in the Blank",
+      "description": "Provide a concise answer. Show brief work or a one-sentence explanation where indicated.",
+      "defaultQuestionType": "short-answer",
+      "defaultMarks": 2,
+      "defaultAnswerSpace": { "type": "blank", "lines": 0 },
+      "pageBreakBefore": false,
+      "questions": [
+        { "id": "g11-b-q1", "type": "short-answer", "marks": 2, "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]", "answerKey": "[ANSWER]" },
+        { "id": "g11-b-q2", "type": "short-answer", "marks": 2, "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]", "answerKey": "[ANSWER]" },
+        { "id": "g11-b-q3", "type": "short-answer", "marks": 2, "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]", "answerKey": "[ANSWER]" },
+        { "id": "g11-b-q4", "type": "short-answer", "marks": 2, "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]", "answerKey": "[ANSWER]" },
+        { "id": "g11-b-q5", "type": "short-answer", "marks": 2, "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]", "answerKey": "[ANSWER]" },
+        { "id": "g11-b-q6", "type": "short-answer", "marks": 2, "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]", "answerKey": "[ANSWER]" },
+        { "id": "g11-b-q7", "type": "short-answer", "marks": 2, "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]", "answerKey": "[ANSWER]" },
+        { "id": "g11-b-q8", "type": "short-answer", "marks": 2, "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]", "answerKey": "[ANSWER]" }
+      ]
+    },
+    {
+      "id": "part-c",
+      "label": "C",
+      "enabled": true,
+      "title": "Communication / Reasoning",
+      "description": "Explain your thinking clearly. Use complete sentences and correct notation. You may be asked to compare, justify, identify errors, or explain why a statement is true or false.",
+      "defaultQuestionType": "communication",
+      "defaultMarks": 4,
+      "defaultAnswerSpace": { "type": "lines", "lines": 4 },
+      "pageBreakBefore": true,
+      "questions": [
+        { "id": "g11-c-q1", "type": "communication", "marks": 4, "stem": "A student claims that [PLACEHOLDER statement]. Explain whether this is correct and why.", "answerSpace": { "type": "lines", "lines": 4 }, "answerKey": "[Model response — see answer key]", "teacherNote": "Focus on justification, not length." },
+        { "id": "g11-c-q2", "type": "communication", "marks": 4, "stem": "Compare the representations below: [PLACEHOLDER — table, graph, or equation]. State one similarity and one difference.", "answerSpace": { "type": "lines", "lines": 4 }, "answerKey": "[Model response — see answer key]", "teacherNote": "Require reference to specific features." },
+        { "id": "g11-c-q3", "type": "communication", "marks": 4, "stem": "The following solution contains an error: [PLACEHOLDER]. Identify the error, explain why it is wrong, and provide a corrected step.", "answerSpace": { "type": "lines", "lines": 4 }, "answerKey": "[Model response — see answer key]", "teacherNote": "Award partial credit for identification only." }
+      ]
+    },
+    {
+      "id": "part-d",
+      "label": "D",
+      "enabled": true,
+      "title": "Problem Solving / Applications",
+      "description": "Show all steps. Diagrams, models, and labelled graphs are encouraged where appropriate.",
+      "defaultQuestionType": "problem-solving",
+      "defaultMarks": 6,
+      "defaultAnswerSpace": { "type": "lines", "lines": 6 },
+      "pageBreakBefore": true,
+      "questions": [
+        { "id": "g11-d-q1", "type": "problem-solving", "marks": 6, "stem": "Modelling — [PLACEHOLDER: Write an equation from a real-world context and define all variables.]", "answerSpace": { "type": "lines", "lines": 6 }, "answerKey": "[See answer key for steps]", "teacherNote": "Modelling / function setup" },
+        { "id": "g11-d-q2", "type": "problem-solving", "marks": 6, "stem": "Graphing — [PLACEHOLDER: Sketch or analyse key features of a transformed function.]", "answerSpace": { "type": "lines", "lines": 6 }, "answerKey": "[See answer key for steps]", "teacherNote": "Graphing / transformations" },
+        { "id": "g11-d-q3", "type": "problem-solving", "marks": 8, "stem": "Parameters — [PLACEHOLDER: Explain how a parameter affects the graph or model. Support with an example.]", "answerSpace": { "type": "lines", "lines": 8 }, "answerKey": "[See answer key for steps]", "teacherNote": "Parameter analysis" },
+        { "id": "g11-d-q4", "type": "problem-solving", "marks": 8, "stem": "Application — [PLACEHOLDER: Solve a real-world problem and interpret the result in context with units.]", "answerSpace": { "type": "lines", "lines": 8 }, "answerKey": "[See answer key for steps]", "teacherNote": "Real-world application" }
+      ]
+    }
+  ],
+  "bonus": {
+    "enabled": true,
+    "id": "bonus-1",
+    "label": "B1",
+    "marks": "+___",
+    "stem": "Optional enrichment — [PLACEHOLDER: challenge proof, extension, or synthesis across units]",
+    "answerSpace": { "type": "lines", "lines": 3 },
+    "teacherNote": "Bonus only if main sections attempted.",
+    "answerKey": "[PLACEHOLDER]"
+  },
+  "rubric": {
+    "framework": "KTCA",
+    "region": "Ontario",
+    "categories": [
+      { "code": "K", "name": "Knowledge & Understanding" },
+      { "code": "T", "name": "Thinking" },
+      { "code": "C", "name": "Communication" },
+      { "code": "A", "name": "Application" }
+    ],
+    "notes": "See exams/g11-functions/rubric-template.md for full descriptors."
+  },
+  "settings": {
+    "showMarkDistribution": true,
+    "showInstructions": true,
+    "showBonus": true,
+    "autoNumberQuestions": true
+  }
+}
