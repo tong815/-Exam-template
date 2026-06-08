@@ -103,6 +103,7 @@ Printable exam header (student-facing).
 | `defaultMarks` | number | recommended | Default marks per question |
 | `defaultAnswerSpace` | answerSpace | optional | Default answer area |
 | `pageBreakBefore` | boolean | default `false` | Print page break before section |
+| `keepHeadingWithFirstQuestion` | boolean | default `true` | Keep part heading + first item on same page when printing |
 | `questions` | Question[] | yes | Questions in this part |
 
 Parts are **not** limited to A/B/C/D. Use any `id` / `label` pattern.
@@ -125,6 +126,19 @@ Parts are **not** limited to A/B/C/D. Use any `id` / `label` pattern.
 | `tags` | string[] | optional | Topic / skill / difficulty tags for future analytics |
 | `attachments` | object[] | optional | Figures, tables, graphs (see below) |
 | `rubricAllocation` | object | optional | Per-question rubric weights, e.g. `{ "K": 2, "T": 1 }` |
+| `pageBreakBefore` | boolean | default `false` | Print page break before this question |
+| `breakInside` | string | default `"avoid"` | `"avoid"` = try not to split question across pages; `"auto"` = allow split |
+
+### Layout-only question: `page-break`
+
+| Field | Value |
+|:------|:------|
+| `type` | `"page-break"` |
+| `marks` | `0` (not counted in totals) |
+| `stem` | optional / empty |
+| Numbering | skipped (does not receive Q#) |
+
+Use **Add Page Break** in the editor or set `type: "page-break"` manually. Renders as `--- Page Break ---` on screen; forces a new printed page.
 
 ### `attachments[]` (placeholder rendering)
 
@@ -157,6 +171,19 @@ Example:
 | `matching` | Match items + answer space |
 | `true-false` | True/False line |
 | `custom` | Free-form; uses answer space |
+| `page-break` | Manual print page break (layout only; not scored) |
+
+---
+
+## Page break summary
+
+| Level | Fields | Effect |
+|:------|:-------|:-------|
+| Part | `pageBreakBefore`, `keepHeadingWithFirstQuestion` | Section starts new page; heading grouped with first question |
+| Question | `pageBreakBefore`, `breakInside` | Break before question; avoid or allow splitting inside question |
+| Manual block | `type: "page-break"` | Explicit page break; no number / marks |
+
+Print rules are applied via CSS (`@media print`). Browser layout may still vary by content height; these settings reduce common break issues.
 
 ---
 

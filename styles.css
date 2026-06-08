@@ -588,6 +588,53 @@ html[data-paper="a4"] .exam-document {
   color: var(--color-muted);
 }
 
+.exam-section__keep-group {
+  /* Screen: visual grouping only; print rules below */
+}
+
+.page-break-marker,
+.page-break-block {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  color: var(--color-muted);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.page-break-marker__line {
+  flex: 1;
+  height: 0;
+  border-top: 1px dashed #94a3b8;
+}
+
+.page-break-marker__label {
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.editor-add-page-break {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.editor-question--page-break {
+  border: 1px dashed var(--color-editor-border);
+  background: #f1f5f9;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.editor-page-break-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+
 .exam-section__instructions {
   margin: 0 0 1rem;
   padding-left: 1.25rem;
@@ -894,13 +941,54 @@ body.show-answer-key .question-block__answer-key {
   }
 
   .exam-section--page-break {
-    page-break-before: always;
     break-before: page;
+    page-break-before: always;
+  }
+
+  .question-block--page-break {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .page-break-block,
+  .page-break-marker {
+    break-before: page;
+    page-break-before: always;
+    border: none;
+    margin: 0;
+    padding: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .page-break-marker__line,
+  .page-break-marker__label {
+    display: none;
+  }
+
+  .question-block--avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .exam-section__heading {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .exam-section__description,
+  .exam-section__summary {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .exam-section__keep-group {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .question-block {
-    break-inside: avoid;
-    page-break-inside: avoid;
+    /* Default: allow split unless --avoid-break */
   }
 
   .solution-space {

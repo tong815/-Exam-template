@@ -41,12 +41,14 @@
         "lines": 0
       },
       "pageBreakBefore": false,
+      "keepHeadingWithFirstQuestion": true,
       "questions": [
         {
           "id": "g11-a-q1",
+          "number": null,
           "type": "multiple-choice",
-          "marks": 1,
           "stem": "[PLACEHOLDER: domain of a rational function, transformation, or exponent rule]",
+          "marks": 1,
           "options": [
             {
               "key": "A",
@@ -65,14 +67,24 @@
               "text": "[OPTION D]"
             }
           ],
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
           "answerKey": "[A/B/C/D]",
-          "teacherNote": "教师备注：替换题干与干扰项后检查唯一正确答案。"
+          "teacherNote": "教师备注：替换题干与干扰项后检查唯一正确答案。",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-a-q2",
+          "number": null,
           "type": "multiple-choice",
-          "marks": 1,
           "stem": "[PLACEHOLDER: identifying function type from a graph]",
+          "marks": 1,
           "options": [
             {
               "key": "A",
@@ -91,13 +103,24 @@
               "text": "[OPTION D]"
             }
           ],
-          "answerKey": "[A/B/C/D]"
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[A/B/C/D]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-a-q3",
+          "number": null,
           "type": "multiple-choice",
-          "marks": 1,
           "stem": "[PLACEHOLDER: evaluating a composite function]",
+          "marks": 1,
           "options": [
             {
               "key": "A",
@@ -116,13 +139,24 @@
               "text": "[OPTION D]"
             }
           ],
-          "answerKey": "[A/B/C/D]"
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[A/B/C/D]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-a-q4",
+          "number": null,
           "type": "multiple-choice",
-          "marks": 1,
           "stem": "[PLACEHOLDER: solving a simple exponential equation]",
+          "marks": 1,
           "options": [
             {
               "key": "A",
@@ -141,13 +175,24 @@
               "text": "[OPTION D]"
             }
           ],
-          "answerKey": "[A/B/C/D]"
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[A/B/C/D]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-a-q5",
+          "number": null,
           "type": "multiple-choice",
-          "marks": 1,
           "stem": "[PLACEHOLDER: determining the range of a quadratic]",
+          "marks": 1,
           "options": [
             {
               "key": "A",
@@ -166,13 +211,24 @@
               "text": "[OPTION D]"
             }
           ],
-          "answerKey": "[A/B/C/D]"
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[A/B/C/D]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-a-q6",
+          "number": null,
           "type": "multiple-choice",
-          "marks": 1,
           "stem": "[PLACEHOLDER: vertical asymptote of a rational function]",
+          "marks": 1,
           "options": [
             {
               "key": "A",
@@ -191,13 +247,24 @@
               "text": "[OPTION D]"
             }
           ],
-          "answerKey": "[A/B/C/D]"
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[A/B/C/D]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-a-q7",
+          "number": null,
           "type": "multiple-choice",
-          "marks": 1,
           "stem": "[PLACEHOLDER: effect of a horizontal translation]",
+          "marks": 1,
           "options": [
             {
               "key": "A",
@@ -216,13 +283,24 @@
               "text": "[OPTION D]"
             }
           ],
-          "answerKey": "[A/B/C/D]"
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[A/B/C/D]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-a-q8",
+          "number": null,
           "type": "multiple-choice",
-          "marks": 1,
           "stem": "[PLACEHOLDER: inverse of a linear function]",
+          "marks": 1,
           "options": [
             {
               "key": "A",
@@ -241,13 +319,24 @@
               "text": "[OPTION D]"
             }
           ],
-          "answerKey": "[A/B/C/D]"
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[A/B/C/D]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-a-q9",
+          "number": null,
           "type": "multiple-choice",
-          "marks": 1,
           "stem": "[PLACEHOLDER: degree vs. leading coefficient behaviour]",
+          "marks": 1,
           "options": [
             {
               "key": "A",
@@ -266,13 +355,24 @@
               "text": "[OPTION D]"
             }
           ],
-          "answerKey": "[A/B/C/D]"
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[A/B/C/D]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-a-q10",
+          "number": null,
           "type": "multiple-choice",
-          "marks": 1,
           "stem": "[PLACEHOLDER: restrictions on the domain of a root function]",
+          "marks": 1,
           "options": [
             {
               "key": "A",
@@ -291,7 +391,17 @@
               "text": "[OPTION D]"
             }
           ],
-          "answerKey": "[A/B/C/D]"
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[A/B/C/D]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         }
       ]
     },
@@ -307,63 +417,160 @@
         "type": "blank",
         "lines": 0
       },
-      "pageBreakBefore": false,
+      "pageBreakBefore": true,
+      "keepHeadingWithFirstQuestion": true,
       "questions": [
         {
           "id": "g11-b-q1",
+          "number": null,
           "type": "short-answer",
-          "marks": 2,
           "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]",
-          "answerKey": "[ANSWER]"
+          "marks": 2,
+          "options": [],
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[ANSWER]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-b-q2",
+          "number": null,
           "type": "short-answer",
-          "marks": 2,
           "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]",
-          "answerKey": "[ANSWER]"
+          "marks": 2,
+          "options": [],
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[ANSWER]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-b-q3",
+          "number": null,
           "type": "short-answer",
-          "marks": 2,
           "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]",
-          "answerKey": "[ANSWER]"
+          "marks": 2,
+          "options": [],
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[ANSWER]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-b-q4",
+          "number": null,
           "type": "short-answer",
-          "marks": 2,
           "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]",
-          "answerKey": "[ANSWER]"
+          "marks": 2,
+          "options": [],
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[ANSWER]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-b-q5",
+          "number": null,
           "type": "short-answer",
-          "marks": 2,
           "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]",
-          "answerKey": "[ANSWER]"
+          "marks": 2,
+          "options": [],
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[ANSWER]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-b-q6",
+          "number": null,
           "type": "short-answer",
-          "marks": 2,
           "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]",
-          "answerKey": "[ANSWER]"
+          "marks": 2,
+          "options": [],
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[ANSWER]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-b-q7",
+          "number": null,
           "type": "short-answer",
-          "marks": 2,
           "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]",
-          "answerKey": "[ANSWER]"
+          "marks": 2,
+          "options": [],
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[ANSWER]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-b-q8",
+          "number": null,
           "type": "short-answer",
-          "marks": 2,
           "stem": "[PLACEHOLDER: Short answer — evaluate, simplify, or state a value]",
-          "answerKey": "[ANSWER]"
+          "marks": 2,
+          "options": [],
+          "answerSpace": {
+            "type": "blank",
+            "lines": 0
+          },
+          "answerKey": "[ANSWER]",
+          "teacherNote": "",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         }
       ]
     },
@@ -380,42 +587,64 @@
         "lines": 4
       },
       "pageBreakBefore": true,
+      "keepHeadingWithFirstQuestion": true,
       "questions": [
         {
           "id": "g11-c-q1",
+          "number": null,
           "type": "communication",
-          "marks": 4,
           "stem": "A student claims that [PLACEHOLDER statement]. Explain whether this is correct and why.",
+          "marks": 4,
+          "options": [],
           "answerSpace": {
             "type": "lines",
             "lines": 4
           },
           "answerKey": "[Model response — see answer key]",
-          "teacherNote": "Focus on justification, not length."
+          "teacherNote": "Focus on justification, not length.",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-c-q2",
+          "number": null,
           "type": "communication",
-          "marks": 4,
           "stem": "Compare the representations below: [PLACEHOLDER — table, graph, or equation]. State one similarity and one difference.",
+          "marks": 4,
+          "options": [],
           "answerSpace": {
             "type": "lines",
             "lines": 4
           },
           "answerKey": "[Model response — see answer key]",
-          "teacherNote": "Require reference to specific features."
+          "teacherNote": "Require reference to specific features.",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-c-q3",
+          "number": null,
           "type": "communication",
-          "marks": 4,
           "stem": "The following solution contains an error: [PLACEHOLDER]. Identify the error, explain why it is wrong, and provide a corrected step.",
+          "marks": 4,
+          "options": [],
           "answerSpace": {
             "type": "lines",
             "lines": 4
           },
           "answerKey": "[Model response — see answer key]",
-          "teacherNote": "Award partial credit for identification only."
+          "teacherNote": "Award partial credit for identification only.",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         }
       ]
     },
@@ -432,54 +661,83 @@
         "lines": 6
       },
       "pageBreakBefore": true,
+      "keepHeadingWithFirstQuestion": true,
       "questions": [
         {
           "id": "g11-d-q1",
+          "number": null,
           "type": "problem-solving",
-          "marks": 6,
           "stem": "Modelling — [PLACEHOLDER: Write an equation from a real-world context and define all variables.]",
+          "marks": 6,
+          "options": [],
           "answerSpace": {
             "type": "lines",
             "lines": 6
           },
           "answerKey": "[See answer key for steps]",
-          "teacherNote": "Modelling / function setup"
+          "teacherNote": "Modelling / function setup",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-d-q2",
+          "number": null,
           "type": "problem-solving",
-          "marks": 6,
           "stem": "Graphing — [PLACEHOLDER: Sketch or analyse key features of a transformed function.]",
+          "marks": 6,
+          "options": [],
           "answerSpace": {
             "type": "lines",
             "lines": 6
           },
           "answerKey": "[See answer key for steps]",
-          "teacherNote": "Graphing / transformations"
+          "teacherNote": "Graphing / transformations",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "avoid"
         },
         {
           "id": "g11-d-q3",
+          "number": null,
           "type": "problem-solving",
-          "marks": 8,
           "stem": "Parameters — [PLACEHOLDER: Explain how a parameter affects the graph or model. Support with an example.]",
+          "marks": 8,
+          "options": [],
           "answerSpace": {
             "type": "lines",
             "lines": 8
           },
           "answerKey": "[See answer key for steps]",
-          "teacherNote": "Parameter analysis"
+          "teacherNote": "Parameter analysis",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "auto"
         },
         {
           "id": "g11-d-q4",
+          "number": null,
           "type": "problem-solving",
-          "marks": 8,
           "stem": "Application — [PLACEHOLDER: Solve a real-world problem and interpret the result in context with units.]",
+          "marks": 8,
+          "options": [],
           "answerSpace": {
             "type": "lines",
             "lines": 8
           },
           "answerKey": "[See answer key for steps]",
-          "teacherNote": "Real-world application"
+          "teacherNote": "Real-world application",
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {},
+          "pageBreakBefore": false,
+          "breakInside": "auto"
         }
       ]
     }

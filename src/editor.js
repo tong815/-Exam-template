@@ -69,6 +69,15 @@
   ET.renderQuestionEditor = function (partIndex, qIndex, qNum, question, part) {
     const base = `parts.${partIndex}.questions.${qIndex}`;
     const type = question.type || part.defaultQuestionType;
+
+    if (type === "page-break") {
+      return `
+      <div class="editor-question editor-question--page-break">
+        <div class="editor-question__head">${ET.escapeHtml(ET.t("label.manualPageBreak"))}</div>
+        <p class="editor-page-break-hint">${ET.escapeHtml(ET.t("help.manualPageBreak"))}</p>
+      </div>`;
+    }
+
     const options = ET.normalizeOptions(question.options);
     const lines = question.answerSpace?.lines ?? part.defaultAnswerSpace?.lines ?? 4;
 
@@ -95,14 +104,21 @@
       ? ET.fieldNumber(ET.t("field.answerSpaceLines"), `${base}.answerSpace.lines`, lines, 1, 40)
       : "";
 
+    const breakInsideValue = question.breakInside === "auto" ? "auto" : "avoid";
+
     return `
       <div class="editor-question">
-        <div class="editor-question__head">${ET.t("question.head", { num: qNum })}</div>
+        <div class="editor-question__head">${qNum == null ? ET.escapeHtml(ET.t("label.pageBreak")) : ET.t("question.head", { num: qNum })}</div>
         <div class="editor-question__grid">
           ${ET.fieldNumber(ET.t("field.marks"), `${base}.marks`, question.marks, 0, 100)}
           ${ET.fieldSelect(ET.t("field.type"), `${base}.type`, type, ET.getLocalizedQuestionTypes())}
           ${ET.fieldTextarea(ET.t("field.stemPlaceholder"), `${base}.stem`, question.stem, 2)}
           ${linesField}
+          ${ET.fieldCheckbox(ET.t("field.pageBreakBefore"), `${base}.pageBreakBefore`, !!question.pageBreakBefore, `-qpb`)}
+          ${ET.fieldSelect(ET.t("field.breakInside"), `${base}.breakInside`, breakInsideValue, [
+            { value: "avoid", label: ET.t("field.keepQuestionOnOnePage") },
+            { value: "auto", label: ET.t("field.allowSplitAcrossPages") },
+          ])}
           ${ET.fieldText(ET.t("field.answerKeyPlaceholder"), `${base}.answerKey`, question.answerKey)}
           ${ET.fieldTextarea(ET.t("field.teacherNote"), `${base}.teacherNote`, question.teacherNote, 2)}
           ${ET.fieldText(ET.t("field.tags"), `${base}.__tagsCsv`, (question.tags || []).join(", "), 'data-input-type="tags-csv"')}
@@ -115,11 +131,12 @@
 
   ET.renderPartEditor = function (partIndex, part, numberMap, view) {
     const numbers = numberMap.get(part.id) || [];
-    const startQ = numbers[0] ?? "—";
-    const endQ = numbers[numbers.length - 1] ?? "—";
+    const scorableNumbers = numbers.filter((n) => n != null);
+    const startQ = scorableNumbers[0] ?? "—";
+    const endQ = scorableNumbers[scorableNumbers.length - 1] ?? "—";
     const rangeLabel =
-      numbers.length > 0
-        ? numbers.length === 1
+      scorableNumbers.length > 0
+        ? scorableNumbers.length === 1
           ? `Q${startQ}`
           : `Q${startQ}–Q${endQ}`
         : ET.t("part.rangeDisabled");
@@ -131,7 +148,7 @@
     const questionsHtml =
       part.enabled && qCount > 0
         ? part.questions
-            .map((q, qi) => ET.renderQuestionEditor(partIndex, qi, numbers[qi] ?? "?", q, part))
+            .map((q, qi) => ET.renderQuestionEditor(partIndex, qi, numbers[qi], q, part))
             .join("")
         : `<p class="editor-section__subtitle">${ET.escapeHtml(ET.t("part.noQuestions"))}</p>`;
 
@@ -151,8 +168,10 @@
           ${ET.fieldNumber(ET.t("field.defaultMarks"), `parts.${partIndex}.defaultMarks`, part.defaultMarks, 0, 100)}
           ${ET.fieldNumber(ET.t("field.defaultAnswerLines"), `parts.${partIndex}.defaultAnswerSpace.lines`, part.defaultAnswerSpace?.lines ?? 0, 0, 40)}
           ${ET.fieldCheckbox(ET.t("field.pageBreakBefore"), `parts.${partIndex}.pageBreakBefore`, part.pageBreakBefore, `-pb`)}
+          ${ET.fieldCheckbox(ET.t("field.keepHeadingWithFirstQuestion"), `parts.${partIndex}.keepHeadingWithFirstQuestion`, part.keepHeadingWithFirstQuestion !== false, `-kh`)}
         </div>
         ${questionsHtml}
+        <button type="button" class="btn btn--secondary editor-add-page-break" data-action="add-page-break" data-part-index="${partIndex}">${ET.escapeHtml(ET.t("button.addPageBreak"))}</button>
       </div>`;
   };
 

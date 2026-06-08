@@ -15,9 +15,38 @@
     { value: "matching", label: "Matching" },
     { value: "true-false", label: "True / False" },
     { value: "custom", label: "Custom" },
+    { value: "page-break", label: "Page Break" },
   ];
 
+  ET.isPageBreakQuestion = function (q) {
+    return q != null && q.type === "page-break";
+  };
+
+  ET.getScorableQuestions = function (questions) {
+    return (questions || []).filter((q) => !ET.isPageBreakQuestion(q));
+  };
+
+  ET.createPageBreakQuestion = function (overrides = {}) {
+    return ET.createQuestion({
+      id: ET.uid("page-break"),
+      type: "page-break",
+      stem: "",
+      marks: 0,
+      options: [],
+      answerSpace: { type: "blank", lines: 0 },
+      answerKey: "",
+      teacherNote: "",
+      tags: ["layout"],
+      attachments: [],
+      rubricAllocation: {},
+      pageBreakBefore: true,
+      breakInside: "auto",
+      ...overrides,
+    });
+  };
+
   ET.usesAnswerLines = function (type) {
+    if (type === "page-break") return false;
     return ["long-answer", "communication", "problem-solving", "custom", "matching"].includes(type);
   };
 
@@ -30,19 +59,24 @@
 
   ET.createQuestion = function (overrides = {}) {
     const type = overrides.type || "short-answer";
+    const isPageBreak = type === "page-break";
     return {
       id: overrides.id || ET.uid("q"),
       number: overrides.number ?? null,
       type,
       stem: overrides.stem ?? "",
-      marks: overrides.marks ?? 1,
-      options: overrides.options ?? (type === "multiple-choice" ? ET.defaultMcOptions() : []),
-      answerSpace: overrides.answerSpace ?? ET.defaultAnswerSpaceForType(type),
+      marks: isPageBreak ? 0 : overrides.marks ?? 1,
+      options: isPageBreak ? [] : overrides.options ?? (type === "multiple-choice" ? ET.defaultMcOptions() : []),
+      answerSpace: isPageBreak
+        ? { type: "blank", lines: 0 }
+        : overrides.answerSpace ?? ET.defaultAnswerSpaceForType(type),
       answerKey: overrides.answerKey ?? "",
       teacherNote: overrides.teacherNote ?? "",
-      tags: ET.normalizeTags(overrides.tags),
+      tags: ET.normalizeTags(isPageBreak ? overrides.tags ?? ["layout"] : overrides.tags),
       attachments: ET.normalizeAttachments(overrides.attachments),
       rubricAllocation: ET.normalizeRubricAllocation(overrides.rubricAllocation),
+      pageBreakBefore: overrides.pageBreakBefore ?? (isPageBreak ? true : false),
+      breakInside: overrides.breakInside ?? (isPageBreak ? "auto" : "avoid"),
     };
   };
 
@@ -73,6 +107,7 @@
       defaultMarks: overrides.defaultMarks ?? 1,
       defaultAnswerSpace: overrides.defaultAnswerSpace ?? ET.defaultAnswerSpaceForType(questionType),
       pageBreakBefore: !!overrides.pageBreakBefore,
+      keepHeadingWithFirstQuestion: overrides.keepHeadingWithFirstQuestion !== false,
       questions: Array.isArray(overrides.questions) ? overrides.questions.map((q) => ET.createQuestion(q)) : [],
     };
   };
@@ -314,7 +349,9 @@
         questionType,
         raw.defaultSolutionLines
       ),
-      pageBreakBefore: raw.pageBreakBefore ?? fb.pageBreakBefore,
+      pageBreakBefore: raw.pageBreakBefore ?? fb.pageBreakBefore ?? false,
+      keepHeadingWithFirstQuestion:
+        raw.keepHeadingWithFirstQuestion ?? fb.keepHeadingWithFirstQuestion ?? true,
       questions: [],
     };
 
@@ -347,6 +384,23 @@
 
   ET.normalizeQuestion = function (raw, part, index) {
     const type = raw.type || part.defaultQuestionType;
+    if (type === "page-break") {
+      return ET.createQuestion({
+        id: raw.id || ET.uid("page-break"),
+        type: "page-break",
+        stem: raw.stem ?? "",
+        marks: 0,
+        options: [],
+        answerSpace: { type: "blank", lines: 0 },
+        answerKey: raw.answerKey ?? "",
+        teacherNote: raw.teacherNote ?? "",
+        tags: raw.tags ?? ["layout"],
+        attachments: raw.attachments,
+        rubricAllocation: raw.rubricAllocation,
+        pageBreakBefore: raw.pageBreakBefore !== false,
+        breakInside: raw.breakInside === "avoid" ? "avoid" : "auto",
+      });
+    }
     return ET.createQuestion({
       id: raw.id || ET.uid("q"),
       number: raw.number ?? null,
@@ -360,6 +414,8 @@
       tags: ET.normalizeTags(raw.tags),
       attachments: ET.normalizeAttachments(raw.attachments),
       rubricAllocation: ET.normalizeRubricAllocation(raw.rubricAllocation),
+      pageBreakBefore: !!raw.pageBreakBefore,
+      breakInside: raw.breakInside === "auto" ? "auto" : "avoid",
     });
   };
 
@@ -408,15 +464,20 @@
       ET.getEnabledParts(exam).forEach((part) => {
         map.set(
           part.id,
-          part.questions.map((q) => q.number ?? num++)
+          part.questions.map((q) => {
+            if (ET.isPageBreakQuestion(q)) return null;
+            return q.number ?? num++;
+          })
         );
       });
       return map;
     }
     ET.getEnabledParts(exam).forEach((part) => {
-      const numbers = part.questions.map(() => num++);
-      part.questions.forEach((q, i) => {
-        q.number = numbers[i];
+      const numbers = part.questions.map((q) => {
+        if (ET.isPageBreakQuestion(q)) return null;
+        const n = num++;
+        q.number = n;
+        return n;
       });
       map.set(part.id, numbers);
     });
@@ -424,21 +485,23 @@
   };
 
   ET.sumMarks = function (questions) {
-    return questions.reduce((s, q) => s + (Number(q.marks) || 0), 0);
+    return ET.getScorableQuestions(questions).reduce((s, q) => s + (Number(q.marks) || 0), 0);
   };
 
   ET.formatMarksPerQ = function (questions, defaultMarks) {
-    if (!questions.length) return "—";
-    const marks = questions.map((q) => q.marks);
+    const scorable = ET.getScorableQuestions(questions);
+    if (!scorable.length) return "—";
+    const marks = scorable.map((q) => q.marks);
     if (marks.every((m) => m === marks[0])) return String(marks[0] ?? defaultMarks);
     return marks.join(", ");
   };
 
   ET.buildMarksSummary = function (part, questions) {
-    const n = questions.length;
+    const scorable = ET.getScorableQuestions(questions);
+    const n = scorable.length;
     if (!n) return "0 questions";
-    const total = ET.sumMarks(questions);
-    const marks = questions.map((q) => q.marks);
+    const total = ET.sumMarks(scorable);
+    const marks = scorable.map((q) => q.marks);
     const allSame = marks.every((m) => m === marks[0]);
     const unit = marks[0] === 1 ? "mark" : "marks";
     if (allSame) return `${n} question${n > 1 ? "s" : ""} × ${marks[0]} ${unit} = ${total} marks`;
@@ -463,10 +526,13 @@
       const numbers = numberMap.get(part.id) || [];
       const questions = part.questions.map((q, i) => ({
         ...q,
-        number: numbers[i] ?? q.number,
+        number: numbers[i] ?? q.number ?? null,
         options: ET.normalizeOptions(q.options),
         answerSpace: ET.normalizeAnswerSpace(q.answerSpace, q.type),
+        pageBreakBefore: !!q.pageBreakBefore,
+        breakInside: q.breakInside === "auto" ? "auto" : "avoid",
       }));
+      const scorable = ET.getScorableQuestions(questions);
 
       builtParts.push({
         part: {
@@ -474,20 +540,24 @@
           label: part.label,
           title: part.title,
           description: part.description,
-          marksSummary: ET.buildMarksSummary(part, questions),
+          marksSummary: ET.buildMarksSummary(part, scorable),
           pageBreakBefore: !!part.pageBreakBefore,
+          keepHeadingWithFirstQuestion: part.keepHeadingWithFirstQuestion !== false,
         },
         questions,
       });
     });
 
-    const rows = builtParts.map(({ part, questions }) => ({
-      part: part.label,
-      section: part.title,
-      questions: questions.length,
-      marksPerQ: ET.formatMarksPerQ(questions, 1),
-      subtotal: ET.sumMarks(questions),
-    }));
+    const rows = builtParts.map(({ part, questions }) => {
+      const scorable = ET.getScorableQuestions(questions);
+      return {
+        part: part.label,
+        section: part.title,
+        questions: scorable.length,
+        marksPerQ: ET.formatMarksPerQ(scorable, 1),
+        subtotal: ET.sumMarks(scorable),
+      };
+    });
 
     const totalMarks = rows.reduce((s, r) => s + r.subtotal, 0);
     const markDistribution = [...rows];
@@ -611,6 +681,20 @@
         if (!part.id) pushError("missingPartId", { path: pfx }, `${pfx}: missing part id`);
         if (!part.title) pushWarning("missingPartTitle", { path: pfx }, `${pfx}: missing part title`);
 
+        if (part.pageBreakBefore != null && typeof part.pageBreakBefore !== "boolean") {
+          pushWarning("invalidPageBreakBefore", { path: pfx }, `${pfx}: pageBreakBefore should be boolean`);
+        }
+        if (
+          part.keepHeadingWithFirstQuestion != null &&
+          typeof part.keepHeadingWithFirstQuestion !== "boolean"
+        ) {
+          pushWarning(
+            "invalidKeepHeadingWithFirstQuestion",
+            { path: pfx },
+            `${pfx}: keepHeadingWithFirstQuestion should be boolean`
+          );
+        }
+
         if (!Array.isArray(part.questions)) {
           pushError("questionsNotArray", { path: pfx }, `${pfx}: questions must be an array`);
           return;
@@ -621,29 +705,45 @@
 
         part.questions.forEach((q, qi) => {
           const qfx = `${pfx}.questions[${qi}]`;
+          const isPageBreak = ET.isPageBreakQuestion(q);
 
           if (!q.type) pushError("missingQuestionType", { path: qfx }, `${qfx}: missing question type`);
-          if (q.stem == null || String(q.stem).trim() === "") {
-            pushWarning("emptyStem", { path: qfx }, `${qfx}: empty stem`);
-          }
 
-          if (q.marks == null || q.marks === "") {
-            pushError("missingMarks", { path: qfx }, `${qfx}: missing marks`);
+          if (!isPageBreak) {
+            if (q.stem == null || String(q.stem).trim() === "") {
+              pushWarning("emptyStem", { path: qfx }, `${qfx}: empty stem`);
+            }
+
+            if (q.marks == null || q.marks === "") {
+              pushError("missingMarks", { path: qfx }, `${qfx}: missing marks`);
+            } else {
+              const marks = Number(q.marks);
+              if (Number.isNaN(marks) || marks < 0) {
+                pushError("invalidMarks", { path: qfx }, `${qfx}: marks must be a number >= 0`);
+              }
+            }
           } else {
             const marks = Number(q.marks);
-            if (Number.isNaN(marks) || marks < 0) {
-              pushError("invalidMarks", { path: qfx }, `${qfx}: marks must be a number >= 0`);
+            if (!Number.isNaN(marks) && marks !== 0) {
+              pushWarning("pageBreakNonZeroMarks", { path: qfx }, `${qfx}: page-break should have 0 marks`);
             }
           }
 
-          if (q.answerSpace != null) {
+          if (q.pageBreakBefore != null && typeof q.pageBreakBefore !== "boolean") {
+            pushWarning("invalidPageBreakBefore", { path: qfx }, `${qfx}: pageBreakBefore should be boolean`);
+          }
+          if (q.breakInside != null && q.breakInside !== "avoid" && q.breakInside !== "auto") {
+            pushWarning("invalidBreakInside", { path: qfx }, `${qfx}: breakInside must be "avoid" or "auto"`);
+          }
+
+          if (!isPageBreak && q.answerSpace != null) {
             const lines = Number(q.answerSpace.lines);
             if (q.answerSpace.lines != null && (Number.isNaN(lines) || lines < 0)) {
               pushError("invalidAnswerLines", { path: qfx }, `${qfx}: answerSpace.lines must be a number >= 0`);
             }
           }
 
-          if (q.type === "multiple-choice") {
+          if (!isPageBreak && q.type === "multiple-choice") {
             const opts = ET.normalizeOptions(q.options);
             if (opts.length < 2) {
               pushError("mcMinOptions", { path: qfx }, `${qfx}: multiple-choice requires at least 2 options`);

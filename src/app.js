@@ -150,6 +150,9 @@
       path.endsWith("bonus.enabled") ||
       path.endsWith(".type") ||
       path.endsWith(".defaultQuestionType") ||
+      path.endsWith(".pageBreakBefore") ||
+      path.endsWith(".keepHeadingWithFirstQuestion") ||
+      path.endsWith(".breakInside") ||
       path.startsWith("settings.")
     );
   }
@@ -244,7 +247,19 @@
       const qMatch = path.match(/^parts\.(\d+)\.questions\.(\d+)\.type$/);
       if (qMatch) {
         const q = state.parts[Number(qMatch[1])]?.questions[Number(qMatch[2])];
-        if (q) ensureQuestionOptions(q, value);
+        if (q) {
+          ensureQuestionOptions(q, value);
+          if (value === "page-break") {
+            q.marks = 0;
+            q.stem = "";
+            q.options = [];
+            q.answerSpace = { type: "blank", lines: 0 };
+            q.answerKey = "";
+            q.pageBreakBefore = true;
+            q.breakInside = "auto";
+            if (!Array.isArray(q.tags) || !q.tags.length) q.tags = ["layout"];
+          }
+        }
       }
     }
 
@@ -379,11 +394,26 @@
   // Editor events
   // ---------------------------------------------------------------------------
 
+  function addPageBreak(partIndex) {
+    const part = state.parts[partIndex];
+    if (!part) return;
+    part.questions.push(ET.createPageBreakQuestion());
+    markDirty();
+    refreshAll({ rerenderEditor: true });
+    showToast("toast.pageBreakAdded");
+  }
+
   function onEditorInput(event) {
     const el = event.target;
 
     if (el.dataset.action === "add-part") {
       addPart();
+      return;
+    }
+
+    if (el.dataset.action === "add-page-break") {
+      const partIndex = Number(el.dataset.partIndex);
+      if (!Number.isNaN(partIndex)) addPageBreak(partIndex);
       return;
     }
 

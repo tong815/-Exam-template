@@ -116,6 +116,24 @@ C:\Users\chena\Desktop\试卷json\
 
 ---
 
+## Page Break System / 分页系统
+
+分页设置是 `exam-data.json` 结构的一部分，通过 **打印 CSS** 生效；屏幕预览中会显示 `--- Page Break ---` 虚线标记。
+
+| 能力 | 说明 |
+|:-----|:-----|
+| **Part `pageBreakBefore`** | 该 Part 前强制分页 |
+| **Part `keepHeadingWithFirstQuestion`** | Part 标题与第一题尽量同页 |
+| **Question `pageBreakBefore`** | 该题前强制分页 |
+| **Question `breakInside`** | `avoid` = 题目尽量不跨页；`auto` = 允许跨页 |
+| **Manual Page Break** | 编辑器 **添加分页符**；`type: "page-break"`，不计题号与分值 |
+
+G11 Functions Template 默认：Part B/C/D 前分页；Part D 前两题 `avoid`、后两题（较长）`auto`。
+
+详见 [docs/schema-v1.md](docs/schema-v1.md)。
+
+---
+
 ## Schema
 
 - 文档：[docs/schema-v1.md](docs/schema-v1.md)

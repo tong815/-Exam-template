@@ -28,18 +28,20 @@
       description: part?.description ?? "",
       marksSummary: part?.marksSummary ?? "",
       pageBreakBefore: !!part?.pageBreakBefore,
+      keepHeadingWithFirstQuestion: part?.keepHeadingWithFirstQuestion !== false,
       questions: Array.isArray(part?.questions) ? part.questions : [],
     };
   };
 
   ET.safeQuestion = function (q, index) {
     const type = q?.type || "custom";
+    const isPageBreak = type === "page-break";
     return {
       id: q?.id ?? `q-${index}`,
-      number: q?.number ?? index + 1,
+      number: q?.number ?? (isPageBreak ? null : index + 1),
       type,
-      stem: q?.stem ?? "[No stem provided]",
-      marks: q?.marks != null ? q.marks : 0,
+      stem: isPageBreak ? q?.stem ?? "" : q?.stem ?? "[No stem provided]",
+      marks: isPageBreak ? 0 : q?.marks != null ? q.marks : 0,
       options: ET.normalizeOptions(q?.options),
       answerSpace: ET.normalizeAnswerSpace(q?.answerSpace, type),
       answerKey: q?.answerKey ?? "",
@@ -47,7 +49,19 @@
       tags: ET.normalizeTags(q?.tags),
       attachments: ET.normalizeAttachments(q?.attachments),
       rubricAllocation: ET.normalizeRubricAllocation(q?.rubricAllocation),
+      pageBreakBefore: !!q?.pageBreakBefore,
+      breakInside: q?.breakInside === "auto" ? "auto" : "avoid",
     };
+  };
+
+  ET.renderPageBreakMarker = function (labelText) {
+    const label = labelText || (typeof ET.t === "function" ? ET.t("label.pageBreak") : "Page Break");
+    return `<div class="page-break-marker" role="separator" aria-label="${ET.escapeHtml(label)}"><span class="page-break-marker__line"></span><span class="page-break-marker__label">--- ${ET.escapeHtml(label)} ---</span><span class="page-break-marker__line"></span></div>`;
+  };
+
+  ET.renderPageBreakBlock = function (q) {
+    const label = typeof ET.t === "function" ? ET.t("label.manualPageBreak") : "Manual Page Break";
+    return `<div class="page-break-block page-break-marker" role="separator" aria-label="${ET.escapeHtml(label)}"><span class="page-break-marker__line"></span><span class="page-break-marker__label">--- ${ET.escapeHtml(label)} ---</span><span class="page-break-marker__line"></span></div>`;
   };
 
   ET.renderAttachments = function (attachments) {
@@ -197,6 +211,8 @@
 
   ET.renderQuestionBody = function (q) {
     const safe = ET.safeQuestion(q, 0);
+    if (safe.type === "page-break") return "";
+
     const options = safe.options;
 
     switch (safe.type) {
@@ -255,6 +271,15 @@
 
   ET.renderQuestion = function (q, index) {
     const safe = ET.safeQuestion(q, index ?? 0);
+
+    if (safe.type === "page-break") {
+      return ET.renderPageBreakBlock(safe);
+    }
+
+    const beforeMarker = safe.pageBreakBefore ? ET.renderPageBreakMarker() : "";
+    const avoidClass = safe.breakInside === "avoid" ? " question-block--avoid-break" : "";
+    const pageBreakClass = safe.pageBreakBefore ? " question-block--page-break" : "";
+
     const attachmentsHtml = ET.renderAttachments(safe.attachments);
     const body = ET.renderQuestionBody(safe);
     const teacherNote = safe.teacherNote
@@ -265,7 +290,8 @@
       : "";
 
     return `
-      <article class="question-block" data-question="${safe.number}" data-type="${safe.type}">
+      ${beforeMarker}
+      <article class="question-block${avoidClass}${pageBreakClass}" data-question="${safe.number}" data-type="${safe.type}">
         <div class="question-block__header">
           <span class="question-block__number">${safe.number}.</span>
           <span class="question-block__stem">${ET.escapeHtml(safe.stem)}</span>
@@ -278,16 +304,48 @@
       </article>`;
   };
 
+  ET.renderPartIntro = function (safe) {
+    return `
+        <h2 class="exam-section__heading">Part ${ET.escapeHtml(safe.label)} — ${ET.escapeHtml(safe.title)}</h2>
+        <p class="exam-section__summary">${ET.escapeHtml(safe.marksSummary)}</p>
+        <p class="exam-section__description">${ET.escapeHtml(safe.description)}</p>`;
+  };
+
+  ET.renderPartQuestionItems = function (questions, startIndex) {
+    return questions.map((q, i) => ET.renderQuestion(q, startIndex + i)).join("");
+  };
+
   ET.renderPart = function (part) {
     const safe = ET.safePart(part);
     const pageBreakClass = safe.pageBreakBefore ? " exam-section--page-break" : "";
-    const questions = safe.questions.map((q, i) => ET.renderQuestion(q, i)).join("");
+    const keepClass = safe.keepHeadingWithFirstQuestion ? " exam-section--keep-heading" : "";
+    const intro = ET.renderPartIntro(safe);
+    const items = safe.questions;
+
+    if (!items.length) {
+      return `
+      <section class="exam-section${pageBreakClass}${keepClass}" data-part="${ET.escapeHtml(safe.id)}">
+        ${intro}
+      </section>`;
+    }
+
+    if (safe.keepHeadingWithFirstQuestion) {
+      const firstHtml = ET.renderQuestion(items[0], 0);
+      const restHtml = items.length > 1 ? ET.renderPartQuestionItems(items.slice(1), 1) : "";
+      return `
+      <section class="exam-section${pageBreakClass}${keepClass}" data-part="${ET.escapeHtml(safe.id)}">
+        <div class="exam-section__keep-group">
+          <div class="exam-section__intro">${intro}</div>
+          ${firstHtml}
+        </div>
+        ${restHtml}
+      </section>`;
+    }
+
     return `
-      <section class="exam-section${pageBreakClass}" data-part="${ET.escapeHtml(safe.id)}">
-        <h2 class="exam-section__heading">Part ${ET.escapeHtml(safe.label)} — ${ET.escapeHtml(safe.title)}</h2>
-        <p class="exam-section__summary">${ET.escapeHtml(safe.marksSummary)}</p>
-        <p class="exam-section__description">${ET.escapeHtml(safe.description)}</p>
-        ${questions}
+      <section class="exam-section${pageBreakClass}${keepClass}" data-part="${ET.escapeHtml(safe.id)}">
+        ${intro}
+        ${ET.renderPartQuestionItems(items, 0)}
       </section>`;
   };
 

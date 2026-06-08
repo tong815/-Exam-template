@@ -94,6 +94,8 @@
         answerSpace: { type: "lines", lines: marks[i] },
         answerKey: "[See answer key for steps]",
         teacherNote: notes[i] || "",
+        pageBreakBefore: false,
+        breakInside: i >= 2 ? "auto" : "avoid",
       })
     );
   }
@@ -139,6 +141,7 @@
           defaultMarks: 1,
           defaultAnswerSpace: { type: "blank", lines: 0 },
           pageBreakBefore: false,
+          keepHeadingWithFirstQuestion: true,
           questions: g11PartAQuestions(),
         }),
         ET.createPart({
@@ -150,7 +153,8 @@
           defaultQuestionType: "short-answer",
           defaultMarks: 2,
           defaultAnswerSpace: { type: "blank", lines: 0 },
-          pageBreakBefore: false,
+          pageBreakBefore: true,
+          keepHeadingWithFirstQuestion: true,
           questions: g11PartBQuestions(),
         }),
         ET.createPart({
@@ -163,6 +167,7 @@
           defaultMarks: 4,
           defaultAnswerSpace: { type: "lines", lines: 4 },
           pageBreakBefore: true,
+          keepHeadingWithFirstQuestion: true,
           questions: g11PartCQuestions(),
         }),
         ET.createPart({
@@ -175,6 +180,7 @@
           defaultMarks: 6,
           defaultAnswerSpace: { type: "lines", lines: 6 },
           pageBreakBefore: true,
+          keepHeadingWithFirstQuestion: true,
           questions: g11PartDQuestions(),
         }),
       ],
