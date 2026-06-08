@@ -104,7 +104,7 @@
       ? ET.fieldNumber(ET.t("field.answerSpaceLines"), `${base}.answerSpace.lines`, lines, 1, 40)
       : "";
 
-    const breakInsideValue = question.breakInside === "auto" ? "auto" : "avoid";
+    const breakInsideValue = ET.normalizeBreakInside(question.breakInside);
 
     return `
       <div class="editor-question">

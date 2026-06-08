@@ -50,7 +50,7 @@
       attachments: ET.normalizeAttachments(q?.attachments),
       rubricAllocation: ET.normalizeRubricAllocation(q?.rubricAllocation),
       pageBreakBefore: !!q?.pageBreakBefore,
-      breakInside: q?.breakInside === "auto" ? "auto" : "avoid",
+      breakInside: ET.normalizeBreakInside(q?.breakInside),
     };
   };
 
@@ -277,8 +277,10 @@
     }
 
     const beforeMarker = safe.pageBreakBefore ? ET.renderPageBreakMarker() : "";
-    const avoidClass = safe.breakInside === "avoid" ? " question-block--avoid-break" : "";
-    const pageBreakClass = safe.pageBreakBefore ? " question-block--page-break" : "";
+    const breakClass =
+      safe.breakInside === "avoid"
+        ? " question-block--avoid-break"
+        : " question-block--allow-split";
 
     const attachmentsHtml = ET.renderAttachments(safe.attachments);
     const body = ET.renderQuestionBody(safe);
@@ -291,7 +293,7 @@
 
     return `
       ${beforeMarker}
-      <article class="question-block${avoidClass}${pageBreakClass}" data-question="${safe.number}" data-type="${safe.type}">
+      <article class="question-block${breakClass}" data-question="${safe.number}" data-type="${safe.type}">
         <div class="question-block__header">
           <span class="question-block__number">${safe.number}.</span>
           <span class="question-block__stem">${ET.escapeHtml(safe.stem)}</span>

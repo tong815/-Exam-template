@@ -127,7 +127,7 @@ Parts are **not** limited to A/B/C/D. Use any `id` / `label` pattern.
 | `attachments` | object[] | optional | Figures, tables, graphs (see below) |
 | `rubricAllocation` | object | optional | Per-question rubric weights, e.g. `{ "K": 2, "T": 1 }` |
 | `pageBreakBefore` | boolean | default `false` | Print page break before this question |
-| `breakInside` | string | default `"avoid"` | `"avoid"` = try not to split question across pages; `"auto"` = allow split |
+| `breakInside` | string | default `"auto"` | `"avoid"` = try not to split question across pages; `"auto"` = allow natural split (default) |
 
 ### Layout-only question: `page-break`
 

@@ -57,6 +57,10 @@
     return { type: "lines", lines: 4 };
   };
 
+  ET.normalizeBreakInside = function (value) {
+    return value === "avoid" ? "avoid" : "auto";
+  };
+
   ET.createQuestion = function (overrides = {}) {
     const type = overrides.type || "short-answer";
     const isPageBreak = type === "page-break";
@@ -76,7 +80,7 @@
       attachments: ET.normalizeAttachments(overrides.attachments),
       rubricAllocation: ET.normalizeRubricAllocation(overrides.rubricAllocation),
       pageBreakBefore: overrides.pageBreakBefore ?? (isPageBreak ? true : false),
-      breakInside: overrides.breakInside ?? (isPageBreak ? "auto" : "avoid"),
+      breakInside: ET.normalizeBreakInside(overrides.breakInside),
     };
   };
 
@@ -398,7 +402,7 @@
         attachments: raw.attachments,
         rubricAllocation: raw.rubricAllocation,
         pageBreakBefore: raw.pageBreakBefore !== false,
-        breakInside: raw.breakInside === "avoid" ? "avoid" : "auto",
+        breakInside: ET.normalizeBreakInside(raw.breakInside),
       });
     }
     return ET.createQuestion({
@@ -415,7 +419,7 @@
       attachments: ET.normalizeAttachments(raw.attachments),
       rubricAllocation: ET.normalizeRubricAllocation(raw.rubricAllocation),
       pageBreakBefore: !!raw.pageBreakBefore,
-      breakInside: raw.breakInside === "auto" ? "auto" : "avoid",
+      breakInside: ET.normalizeBreakInside(raw.breakInside),
     });
   };
 
@@ -530,7 +534,7 @@
         options: ET.normalizeOptions(q.options),
         answerSpace: ET.normalizeAnswerSpace(q.answerSpace, q.type),
         pageBreakBefore: !!q.pageBreakBefore,
-        breakInside: q.breakInside === "auto" ? "auto" : "avoid",
+        breakInside: ET.normalizeBreakInside(q.breakInside),
       }));
       const scorable = ET.getScorableQuestions(questions);
 

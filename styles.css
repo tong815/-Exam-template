@@ -689,8 +689,16 @@ html[data-paper="a4"] .exam-document {
   margin-bottom: 1.1rem;
   padding-bottom: 0.85rem;
   border-bottom: 1px solid var(--color-border-light);
+}
+
+.question-block--avoid-break {
   break-inside: avoid;
   page-break-inside: avoid;
+}
+
+.question-block--allow-split {
+  break-inside: auto;
+  page-break-inside: auto;
 }
 
 .question-block:last-child {
@@ -760,8 +768,6 @@ html[data-paper="a4"] .exam-document {
   border: 1px solid var(--color-border);
   background: #fafafa;
   padding: 0.5rem 0.65rem;
-  break-inside: avoid;
-  page-break-inside: avoid;
 }
 
 .solution-space__label {
@@ -887,42 +893,9 @@ body.show-answer-key .question-block__answer-key {
     box-shadow: none;
   }
 
-  .print-header {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 0.55in;
-    padding: 0.12in 0.5in 0;
-    font-family: var(--font-sans);
-    font-size: 8.5pt;
-    color: #444;
-    border-bottom: 0.5pt solid #999;
-    background: #fff;
-  }
-
+  .print-header,
   .print-footer {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 0.4in;
-    padding: 0.08in 0.5in 0;
-    font-family: var(--font-sans);
-    font-size: 8pt;
-    color: #666;
-    text-align: center;
-    border-top: 0.5pt solid #ccc;
-    background: #fff;
-  }
-
-  .exam-document {
-    padding-top: 0.7in;
-    padding-bottom: 0.55in;
-    padding-left: 0;
-    padding-right: 0;
+    display: none !important;
   }
 
   .toolbar,
@@ -945,20 +918,16 @@ body.show-answer-key .question-block__answer-key {
     page-break-before: always;
   }
 
-  .question-block--page-break {
-    break-before: page;
-    page-break-before: always;
-  }
-
   .page-break-block,
   .page-break-marker {
     break-before: page;
     page-break-before: always;
-    border: none;
+    display: block;
+    height: 0;
     margin: 0;
     padding: 0;
-    height: 0;
     overflow: hidden;
+    border: none;
   }
 
   .page-break-marker__line,
@@ -966,9 +935,19 @@ body.show-answer-key .question-block__answer-key {
     display: none;
   }
 
+  .question-block {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
   .question-block--avoid-break {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  .question-block--allow-split {
+    break-inside: auto;
+    page-break-inside: auto;
   }
 
   .exam-section__heading {
@@ -985,10 +964,6 @@ body.show-answer-key .question-block__answer-key {
   .exam-section__keep-group {
     break-inside: avoid;
     page-break-inside: avoid;
-  }
-
-  .question-block {
-    /* Default: allow split unless --avoid-break */
   }
 
   .solution-space {
