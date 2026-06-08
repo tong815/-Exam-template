@@ -78,6 +78,62 @@
     });
   };
 
+  ET.supportsDirectoryPicker = function () {
+    return typeof window.showDirectoryPicker === "function";
+  };
+
+  ET.writeTextFileToDirectory = async function (dirHandle, fileName, contents) {
+    const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(contents);
+    await writable.close();
+  };
+
+  ET.buildProjectFolderReadme = function (exam) {
+    const p = exam.profile || {};
+    const m = exam.meta || {};
+    const exportedAt = new Date().toISOString();
+    const profileLine = [p.grade, p.subject, p.courseCode, p.courseName].filter(Boolean).join(" / ");
+
+    return `# Exam Project
+
+- **examId:** ${exam.examId || ""}
+- **profile:** ${profileLine || "(not set)"}
+- **testTitle:** ${m.testTitle || ""}
+- **exportedAt:** ${exportedAt}
+
+## How to reopen
+
+1. Open \`index.html\` in Exam Template Editor
+2. Click **Import JSON**
+3. Select \`exam-data.json\` from this folder
+`;
+  };
+
+  /**
+   * Save current exam to a user-selected folder (File System Access API).
+   * @returns {Promise<{ok:boolean, fileName?:string, cancelled?:boolean, unsupported?:boolean, error?:string}>}
+   */
+  ET.saveExamToDirectory = async function (exam) {
+    if (!ET.supportsDirectoryPicker()) {
+      return { ok: false, unsupported: true };
+    }
+
+    try {
+      const dirHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+      const json = JSON.stringify(exam, null, 2);
+      await ET.writeTextFileToDirectory(dirHandle, "exam-data.json", json);
+      await ET.writeTextFileToDirectory(dirHandle, "README.md", ET.buildProjectFolderReadme(exam));
+      return { ok: true, fileName: "exam-data.json" };
+    } catch (err) {
+      if (err && err.name === "AbortError") {
+        return { ok: false, cancelled: true };
+      }
+      console.error("saveExamToDirectory failed:", err);
+      return { ok: false, error: err?.message || String(err) };
+    }
+  };
+
   ET.loadExamProfile = async function (profileId) {
     const profile = ET.getProfileById(profileId);
     if (!profile) throw new Error(`Unknown profile: ${profileId}`);

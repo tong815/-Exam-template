@@ -183,7 +183,7 @@ ExamToolkitAPI.t("toolbar.save") // 翻译 key
 
 | 区域 | 说明 |
 |:-----|:-----|
-| **Toolbar** | Profile、纸张、保存、重置、导入/导出、打印、答案/备注切换 |
+| **Toolbar** | Profile、纸张、保存、重置、导入/导出、另存到文件夹、打印、答案/备注切换 |
 | **左侧 Editor** | Profile、Meta、显示设置、Part 结构、每题字段 |
 | **右侧 Preview** | 学生卷实时预览 |
 
@@ -216,8 +216,35 @@ ExamToolkitAPI.t("toolbar.save") // 翻译 key
 | **自动保存** | 每次编辑写入 `localStorage`（键：`exam-template-editor-v1`） |
 | **Save** | 手动触发保存 |
 | **Export JSON** | 下载当前 `exam-data.json` |
+| **Save As Folder / 另存到文件夹** | 选择本地文件夹并写入 `exam-data.json`（见下节） |
 | **Import JSON** | 从本地 JSON 恢复（覆盖当前编辑状态） |
 | **Reset to Default** | 恢复当前 Profile 的默认数据 |
+
+### Save As Folder / 另存到文件夹
+
+工具栏 **Save As Folder**（中文界面：**另存到文件夹**）在编辑完成后，把当前试卷保存到你指定的本地文件夹。这不是替代 **Export JSON**，而是更方便的「按项目目录落盘」方式。
+
+| 要点 | 说明 |
+|:-----|:-----|
+| **浏览器要求** | 依赖 Chrome / Edge 的 [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker)（`showDirectoryPicker`） |
+| **用户操作** | 点击按钮 → 系统弹出文件夹选择窗口 → 你手动选择目标目录 |
+| **v1 写入文件** | 至少写入 `exam-data.json`（当前完整 `examData` JSON）；同时生成 `README.md`（含 examId、profile、testTitle、导出时间与重开说明） |
+| **不支持时** | Firefox / Safari 等可能不支持；会提示使用 **Export JSON**，程序不会崩溃 |
+| **推荐路径** | `projects/<course-or-profile>/<exam-name>/exam-data.json` |
+
+示例：
+
+```text
+projects/g11-functions/final-2026/exam-data.json
+```
+
+重新打开该试卷：
+
+1. 打开 Exam Template Editor 的 `index.html`
+2. 点击 **Import JSON**
+3. 选择该文件夹中的 `exam-data.json`
+
+**不会做的事：** 自动扫描本地目录、自动创建多级父目录、把 PDF 写入文件夹、绕过浏览器权限、或使用 Node.js 后端——仅在用户选定文件夹后，在浏览器允许的安全范围内写入文件。
 
 ### 打印 PDF
 

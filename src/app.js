@@ -241,6 +241,24 @@
     loadProfile(activeProfileId);
   }
 
+  async function saveAsFolder() {
+    try {
+      const result = await ET.saveExamToDirectory(state);
+      if (result.ok) {
+        showToast("toast.savedToFolder");
+      } else if (result.cancelled) {
+        showToast("toast.saveFolderCancelled");
+      } else if (result.unsupported) {
+        showToast("toast.saveFolderUnsupported");
+      } else {
+        showToast("toast.saveFolderFailed");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("toast.saveFolderFailed");
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Editor events
   // ---------------------------------------------------------------------------
@@ -281,6 +299,7 @@
     const btnSave = document.getElementById("btn-save");
     const btnReset = document.getElementById("btn-reset");
     const btnExport = document.getElementById("btn-export");
+    const btnSaveFolder = document.getElementById("btn-save-folder");
     const btnImport = document.getElementById("btn-import");
     const importFile = document.getElementById("import-file");
     const banner = document.getElementById("answer-key-banner");
@@ -337,6 +356,10 @@
       showToast("toast.exported");
     });
 
+    btnSaveFolder.addEventListener("click", () => {
+      saveAsFolder();
+    });
+
     btnImport.addEventListener("click", () => importFile.click());
     importFile.addEventListener("change", async () => {
       const file = importFile.files?.[0];
@@ -383,6 +406,7 @@
       refresh: refreshAll,
       loadProfile,
       exportJson: () => ET.exportExamJson(state),
+      saveAsFolder: () => saveAsFolder(),
       setPaperSize: applyPaperSize,
       setLanguage: switchLanguage,
       t: ET.t,
