@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Exam Template — Editor &amp; Preview</title>
+  <title>Exam JSON Studio</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="toolbar no-print" role="toolbar" aria-label="Exam editor controls">
     <div class="toolbar__left">
       <div class="toolbar__brand">
-        <span class="toolbar__title" data-i18n="app.title">Exam Template Editor</span>
-        <span class="toolbar__subtitle" data-i18n="app.subtitle">generic structure editor &amp; print preview</span>
+      <span class="toolbar__title" data-i18n="app.title">Exam JSON Studio</span>
+      <span class="toolbar__subtitle" data-i18n="app.subtitle">exam-data.json editor, preview &amp; print</span>
       </div>
       <div class="toolbar__project" id="project-status" aria-live="polite">
         <span class="toolbar__project-label" data-i18n="status.currentProject">Current Project:</span>
@@ -20,8 +20,8 @@
     </div>
     <div class="toolbar__actions">
       <label class="toolbar__select">
-        <span data-i18n="toolbar.profile">Profile</span>
-        <select id="exam-profile" data-i18n-aria="toolbar.profile"></select>
+        <span data-i18n="toolbar.template">Template</span>
+        <select id="exam-profile" data-i18n-aria="toolbar.template"></select>
       </label>
       <label class="toolbar__select">
         <span data-i18n="toolbar.paper">Paper</span>

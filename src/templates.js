@@ -1,12 +1,12 @@
 /**
- * Generic blank template + exam profile registry (no subject-specific content).
+ * Starter template registry (blank + registered providers from src/profiles/).
  */
 (function (ET) {
   "use strict";
 
   ET.EXAM_PROFILES = [];
 
-  /** Register or replace an exam profile (called from src/profiles/*.js). */
+  /** Register or replace a starter template (called from src/profiles/*.js). */
   ET.registerProfile = function (profile) {
     if (!profile || !profile.id) return;
     const idx = ET.EXAM_PROFILES.findIndex((p) => p.id === profile.id);

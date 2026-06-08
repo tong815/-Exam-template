@@ -1,8 +1,16 @@
 # Exam Data Schema v1.0
 
-This document describes the **generic** exam JSON structure used by Exam Template Editor.
+This document describes the **generic** exam JSON structure used by Exam JSON Studio.
 
-The schema is **not** tied to any grade, subject, region, or curriculum. Values such as `Grade 11`, `MCR3U`, or `Ontario` belong in **exam profile content** (`exams/<profile>/exam-data.json`), not in the core schema definition.
+The schema is **not** tied to any grade, subject, region, or curriculum. Values such as `Grade 11`, `MCR3U`, or `Ontario` appear in **real exam project files** or **starter templates** — not in the core schema definition itself.
+
+### Where data lives
+
+| Location | Purpose |
+|:---------|:--------|
+| `examples/` | Minimal schema examples (not real exams) |
+| `templates/` | Reusable starter templates (e.g. G11 skeleton) |
+| Local `exam-data.json` | **Single source of truth** for real exams (outside this repo) |
 
 ---
 
@@ -208,15 +216,15 @@ See [`examples/minimal-exam.json`](../examples/minimal-exam.json) — smallest e
 
 ## Blank template JSON
 
-See [`examples/blank-exam.json`](../examples/blank-exam.json) — matches the built-in Blank Template profile.
+See [`examples/blank-exam.json`](../examples/blank-exam.json) — matches the built-in Blank Template.
 
 ## Generic math quiz (no regional profile)
 
 See [`examples/generic-math-quiz.json`](../examples/generic-math-quiz.json) — Year 9 algebra quiz without Ontario / G11 references.
 
-## G11 Functions full example
+## G11 Functions starter template
 
-See [`exams/g11-functions/exam-data.json`](../exams/g11-functions/exam-data.json) — complete 66-mark Functions unit test skeleton with Ontario KTCA rubric metadata in the profile layer.
+See [`templates/g11-functions-template.json`](../templates/g11-functions-template.json) — 66-mark Functions **starter skeleton** (placeholders, not a real exam) with Ontario KTCA rubric metadata in the profile layer.
 
 ---
 
@@ -253,4 +261,4 @@ Validation does **not** block preview or print. Errors and warnings are shown in
 
 ---
 
-*Schema version: 1.0 — Exam Template project*
+*Schema version: 1.0 — Exam JSON Studio*

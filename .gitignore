@@ -1,0 +1,8 @@
+# Local / private real exam projects
+projects-local/
+private-exams/
+试卷json/
+*.local.json
+
+# Generated PDFs (real exams — keep local only)
+*.pdf

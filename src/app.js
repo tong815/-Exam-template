@@ -286,10 +286,10 @@
       clearDirty();
       applyPaperSize(state.meta.paperSize || "letter");
       refreshAll({ rerenderEditor: true });
-      showToast("toast.loadedProfile", { label: ET.getProfileById(profileId).label });
+      showToast("toast.createdFromTemplate", { label: ET.getProfileById(profileId).label });
     } catch (err) {
       console.error(err);
-      showToast("toast.loadProfileFailed");
+      showToast("toast.createFromTemplateFailed");
     }
   }
 
@@ -432,7 +432,7 @@
     profileSelect.value = activeProfileId;
     profileSelect.addEventListener("change", () => {
       const label = ET.getProfileById(profileSelect.value).label;
-      if (confirm(ET.t("confirm.loadProfile", { label }))) {
+      if (confirm(ET.t("confirm.createFromTemplate", { label }))) {
         loadProfile(profileSelect.value);
       } else {
         profileSelect.value = activeProfileId;
@@ -503,6 +503,7 @@
       normalize: (raw, fb) => ET.normalizeExamData(raw, fb),
       refresh: refreshAll,
       loadProfile,
+      createFromTemplate: loadProfile,
       openProject,
       saveProject,
       saveProjectAs,

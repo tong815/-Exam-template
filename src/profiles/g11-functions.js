@@ -1,6 +1,6 @@
 /**
- * G11 Functions (MCR3U) — profile fallback data for file:// or fetch failure.
- * Subject-specific content lives here, not in templates.js.
+ * G11 Functions (MCR3U) — starter template provider.
+ * Built-in fallback for file:// or when templates/g11-functions-template.json cannot be fetched.
  */
 (function (ET) {
   "use strict";
@@ -197,7 +197,7 @@
           { code: "C", name: "Communication" },
           { code: "A", name: "Application" },
         ],
-        notes: "See exams/g11-functions/rubric-template.md for full descriptors.",
+        notes: "See docs/reference/g11-functions/rubric-template.md for full descriptors.",
       },
       settings: {
         showMarkDistribution: true,
@@ -210,8 +210,8 @@
 
   ET.registerProfile({
     id: "g11-functions",
-    label: "G11 Functions",
-    dataPath: "exams/g11-functions/exam-data.json",
+    label: "G11 Functions Template",
+    dataPath: "templates/g11-functions-template.json",
     getData: function () {
       return ET.defaultG11FunctionsExamData();
     },

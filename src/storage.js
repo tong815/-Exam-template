@@ -1,5 +1,5 @@
 /**
- * localStorage draft persistence + project file I/O + profile loading.
+ * localStorage draft persistence + project file I/O + starter template loading.
  */
 (function (ET) {
   "use strict";
@@ -181,7 +181,7 @@
       const json = await res.json();
       return ET.normalizeExamData(json, profile.getData());
     } catch (err) {
-      console.warn(`Profile fetch failed (${profile.dataPath}), using built-in fallback.`, err);
+      console.warn(`Template fetch failed (${profile.dataPath}), using built-in fallback.`, err);
       return ET.normalizeExamData(profile.getData(), ET.createBlankExam());
     }
   };

@@ -8,11 +8,11 @@
 
   ET.I18N = {
     en: {
-      "app.title": "Exam Template Editor",
-      "app.subtitle": "generic structure editor & print preview",
+      "app.title": "Exam JSON Studio",
+      "app.subtitle": "exam-data.json editor, preview & print",
       "app.documentTitle": "{title} — Editor & Preview",
 
-      "toolbar.profile": "Profile",
+      "toolbar.template": "Template",
       "toolbar.paper": "Paper",
       "toolbar.editorLanguage": "Editor UI",
       "toolbar.openProject": "Open Project",
@@ -32,7 +32,7 @@
 
       "banner.answerKey": "Answer Key Preview — placeholder answers shown below each question",
 
-      "section.examProfile": "Exam Profile",
+      "section.examProfile": "Course Identity",
       "section.examMeta": "Exam Meta",
       "section.displaySettings": "Display Settings",
       "section.partStructure": "Part Structure",
@@ -147,21 +147,21 @@
       "toast.projectSaveFailed": "Failed to save project",
       "toast.projectFileUnsupported":
         "Your browser does not support direct project file access. Please use Chrome or Edge.",
-      "toast.loadedProfile": "Loaded profile: {label}",
-      "toast.loadProfileFailed": "Failed to load profile",
+      "toast.createdFromTemplate": "Created from template: {label}",
+      "toast.createFromTemplateFailed": "Failed to load template",
       "toast.partAdded": "Part added",
 
-      "confirm.reset": "Reset to \"{label}\" default? Unsaved edits will be lost.",
-      "confirm.loadProfile": "Load profile \"{label}\"? Unsaved changes may be lost.",
+      "confirm.reset": "Reset to \"{label}\" default template? Unsaved edits will be lost.",
+      "confirm.createFromTemplate": "Create from template \"{label}\"? Unsaved changes may be lost.",
       "confirm.openProjectDirty": "You have unsaved changes. Open another project anyway?",
       "confirm.unsavedChanges": "You have unsaved changes.",
     },
     zh: {
-      "app.title": "考试模板编辑器",
-      "app.subtitle": "通用结构编辑与打印预览",
+      "app.title": "Exam JSON Studio",
+      "app.subtitle": "exam-data.json 编辑器、预览与打印",
       "app.documentTitle": "{title} — 编辑与预览",
 
-      "toolbar.profile": "考试配置",
+      "toolbar.template": "模板",
       "toolbar.paper": "纸张",
       "toolbar.editorLanguage": "界面语言",
       "toolbar.openProject": "打开项目",
@@ -181,7 +181,7 @@
 
       "banner.answerKey": "答案预览 — 每题下方显示占位答案",
 
-      "section.examProfile": "考试档案 (Profile)",
+      "section.examProfile": "课程信息",
       "section.examMeta": "考试元信息",
       "section.displaySettings": "显示设置",
       "section.partStructure": "大题结构",
@@ -295,12 +295,12 @@
       "toast.projectSaveCancelled": "已取消保存",
       "toast.projectSaveFailed": "保存项目失败",
       "toast.projectFileUnsupported": "当前浏览器不支持项目文件直接读写，请使用 Chrome 或 Edge。",
-      "toast.loadedProfile": "已加载配置：{label}",
-      "toast.loadProfileFailed": "加载配置失败",
+      "toast.createdFromTemplate": "已从模板新建：{label}",
+      "toast.createFromTemplateFailed": "加载模板失败",
       "toast.partAdded": "已添加大题",
 
-      "confirm.reset": "恢复为「{label}」默认设置？未保存的编辑将丢失。",
-      "confirm.loadProfile": "加载配置「{label}」？未保存的修改可能丢失。",
+      "confirm.reset": "恢复为「{label}」默认模板？未保存的编辑将丢失。",
+      "confirm.createFromTemplate": "从模板「{label}」新建？未保存的修改可能丢失。",
       "confirm.openProjectDirty": "当前有未保存的修改，仍要打开其他项目吗？",
       "confirm.unsavedChanges": "存在未保存修改。",
     },
