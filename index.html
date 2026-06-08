@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" data-paper="letter">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>G11 Functions — Exam Editor &amp; Preview</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="toolbar no-print" role="toolbar" aria-label="Exam editor controls">
+    <div class="toolbar__brand">
+      <span class="toolbar__title">G11 Exam Editor</span>
+      <span class="toolbar__subtitle">v1 — structure editor &amp; print preview</span>
+    </div>
+    <div class="toolbar__actions">
+      <label class="toolbar__select">
+        Paper
+        <select id="paper-size" aria-label="Paper size">
+          <option value="letter" selected>Letter</option>
+          <option value="a4">A4</option>
+        </select>
+      </label>
+      <button type="button" id="btn-save" class="btn btn--secondary">Save</button>
+      <button type="button" id="btn-reset" class="btn btn--secondary">Reset to Default</button>
+      <button type="button" id="btn-export" class="btn btn--secondary">Export JSON</button>
+      <button type="button" id="btn-import" class="btn btn--secondary">Import JSON</button>
+      <input type="file" id="import-file" class="is-hidden" accept=".json,application/json">
+      <button type="button" id="btn-print" class="btn btn--primary">Print / Save as PDF</button>
+      <button type="button" id="btn-answer-key" class="btn btn--secondary" aria-pressed="false">
+        Toggle Answer Key Preview
+      </button>
+      <button type="button" id="btn-teacher-notes" class="btn btn--secondary" aria-pressed="false">
+        Toggle Teacher Notes
+      </button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside id="editor-root" class="editor-panel no-print" aria-label="Exam structure editor"></aside>
+
+    <div class="preview-pane">
+      <div id="answer-key-banner" class="answer-key-banner no-print is-hidden" role="status">
+        Answer Key Preview — placeholder answers shown below each question
+      </div>
+      <main id="exam-root" class="exam-document" aria-live="polite"></main>
+    </div>
+  </div>
+
+  <div id="toast" class="toast no-print is-hidden" role="status"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
