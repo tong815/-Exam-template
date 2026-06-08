@@ -45,7 +45,9 @@
           "answerSpace": { "type": "blank", "lines": 0 },
           "answerKey": "",
           "teacherNote": "",
-          "tags": []
+          "tags": [],
+          "attachments": [],
+          "rubricAllocation": {}
         }
       ]
     }

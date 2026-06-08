@@ -40,8 +40,25 @@
       answerSpace: overrides.answerSpace ?? ET.defaultAnswerSpaceForType(type),
       answerKey: overrides.answerKey ?? "",
       teacherNote: overrides.teacherNote ?? "",
-      tags: overrides.tags ?? [],
+      tags: ET.normalizeTags(overrides.tags),
+      attachments: ET.normalizeAttachments(overrides.attachments),
+      rubricAllocation: ET.normalizeRubricAllocation(overrides.rubricAllocation),
     };
+  };
+
+  ET.normalizeTags = function (raw) {
+    if (!Array.isArray(raw)) return [];
+    return raw.map((t) => String(t).trim()).filter(Boolean);
+  };
+
+  ET.normalizeAttachments = function (raw) {
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((a) => a != null && typeof a === "object" && !Array.isArray(a));
+  };
+
+  ET.normalizeRubricAllocation = function (raw) {
+    if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return {};
+    return { ...raw };
   };
 
   ET.createPart = function (overrides = {}) {
@@ -340,7 +357,9 @@
       answerSpace: ET.normalizeAnswerSpace(raw.answerSpace, type, raw.solutionLines),
       answerKey: raw.answerKey ?? "",
       teacherNote: raw.teacherNote ?? "",
-      tags: raw.tags ?? [],
+      tags: ET.normalizeTags(raw.tags),
+      attachments: ET.normalizeAttachments(raw.attachments),
+      rubricAllocation: ET.normalizeRubricAllocation(raw.rubricAllocation),
     });
   };
 
@@ -633,6 +652,47 @@
 
           if (q.type && !ET.KNOWN_QUESTION_TYPES.includes(q.type)) {
             pushWarning("unknownQuestionType", { path: qfx, type: q.type }, `${qfx}: unknown question type "${q.type}"`);
+          }
+
+          if (q.tags != null && !Array.isArray(q.tags)) {
+            pushWarning("tagsNotArray", { path: qfx }, `${qfx}: tags must be an array`);
+          }
+
+          if (q.attachments != null && !Array.isArray(q.attachments)) {
+            pushWarning("attachmentsNotArray", { path: qfx }, `${qfx}: attachments must be an array`);
+          } else if (Array.isArray(q.attachments)) {
+            q.attachments.forEach((att, ai) => {
+              if (!att || typeof att !== "object") return;
+              if (att.type === "image" && !att.src) {
+                pushWarning(
+                  "attachmentMissingSrc",
+                  { path: `${qfx}.attachments[${ai}]` },
+                  `${qfx}.attachments[${ai}]: image attachment missing src`
+                );
+              }
+              if (att.type && !["image", "table", "graph"].includes(att.type)) {
+                pushWarning(
+                  "unknownAttachmentType",
+                  { path: `${qfx}.attachments[${ai}]`, type: att.type },
+                  `${qfx}.attachments[${ai}]: unknown attachment type "${att.type}"`
+                );
+              }
+            });
+          }
+
+          if (q.rubricAllocation != null && (typeof q.rubricAllocation !== "object" || Array.isArray(q.rubricAllocation))) {
+            pushWarning("rubricAllocationNotObject", { path: qfx }, `${qfx}: rubricAllocation must be an object`);
+          } else if (q.rubricAllocation && typeof q.rubricAllocation === "object") {
+            Object.entries(q.rubricAllocation).forEach(([key, val]) => {
+              const num = Number(val);
+              if (Number.isNaN(num) || num < 0) {
+                pushWarning(
+                  "rubricAllocationInvalidValue",
+                  { path: qfx, key, value: val },
+                  `${qfx}: rubricAllocation.${key} should be a non-negative number`
+                );
+              }
+            });
           }
 
           if (q.id) {

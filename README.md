@@ -46,6 +46,8 @@ Exam-template/
 
 通用代码（`src/schema.js`、`src/templates.js` 等）**不写死** Grade 11、Functions、MCR3U、Ontario、KTCA 等；这些只出现在 `exams/` 与 `src/profiles/` 等内容文件中。
 
+**`profile` vs `meta`：** `profile` 表示课程/年级/科目身份（通常不随每次考试变）；`meta` 表示本次考试实例（标题、教师、时长、纸张等）。不要把 `courseCode` 放进 `meta`，也不要把 `testTitle` 放进 `profile`。详见 `docs/schema-v1.md`。
+
 ---
 
 ## Schema hardening v1
@@ -165,9 +167,13 @@ ExamToolkitAPI.t("toolbar.save") // 翻译 key
   "answerSpace": { "type": "lines", "lines": 2 },
   "answerKey": "",
   "teacherNote": "",
-  "tags": []
+  "tags": [],
+  "attachments": [],
+  "rubricAllocation": {}
 }
 ```
+
+每题可选：`tags`（逗号编辑）、`attachments`（JSON 只读，预览占位渲染）、`rubricAllocation`（JSON 编辑，如 `{ "K": 2, "T": 1 }`）。
 
 ---
 

@@ -44,8 +44,36 @@
       answerSpace: ET.normalizeAnswerSpace(q?.answerSpace, type),
       answerKey: q?.answerKey ?? "",
       teacherNote: q?.teacherNote ?? "",
-      tags: q?.tags ?? [],
+      tags: ET.normalizeTags(q?.tags),
+      attachments: ET.normalizeAttachments(q?.attachments),
+      rubricAllocation: ET.normalizeRubricAllocation(q?.rubricAllocation),
     };
+  };
+
+  ET.renderAttachments = function (attachments) {
+    if (!Array.isArray(attachments) || !attachments.length) return "";
+
+    return attachments
+      .map((att) => {
+        const type = att?.type || "unknown";
+        if (type === "image") {
+          if (att.src) {
+            return `
+              <figure class="question-attachment question-attachment--image">
+                <img src="${ET.escapeHtml(att.src)}" alt="${ET.escapeHtml(att.alt || "Figure")}" class="question-attachment__img">
+              </figure>`;
+          }
+          return `<figure class="question-attachment question-attachment--placeholder">[Image attachment — no src]</figure>`;
+        }
+        if (type === "table") {
+          return `<div class="question-attachment question-attachment--table">[Table attachment placeholder]</div>`;
+        }
+        if (type === "graph") {
+          return `<div class="question-attachment question-attachment--graph">[Graph attachment placeholder]</div>`;
+        }
+        return `<div class="question-attachment question-attachment--unknown">Unsupported attachment type: ${ET.escapeHtml(type)}</div>`;
+      })
+      .join("");
   };
 
   ET.renderExamPreview = function (view, rootEl) {
@@ -227,6 +255,7 @@
 
   ET.renderQuestion = function (q, index) {
     const safe = ET.safeQuestion(q, index ?? 0);
+    const attachmentsHtml = ET.renderAttachments(safe.attachments);
     const body = ET.renderQuestionBody(safe);
     const teacherNote = safe.teacherNote
       ? `<div class="teacher-note"><span class="teacher-note__label">Note:</span>${ET.escapeHtml(safe.teacherNote)}</div>`
@@ -242,6 +271,7 @@
           <span class="question-block__stem">${ET.escapeHtml(safe.stem)}</span>
           <span class="question-block__marks">[${ET.escapeHtml(safe.marks)}]</span>
         </div>
+        ${attachmentsHtml}
         ${body}
         ${teacherNote}
         ${answerKey}

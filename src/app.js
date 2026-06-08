@@ -133,6 +133,40 @@
       value = !!rawValue;
     }
 
+    if (inputType === "tags-csv") {
+      const m = path.match(/^parts\.(\d+)\.questions\.(\d+)\.__tagsCsv$/);
+      if (m) {
+        const q = state.parts[Number(m[1])]?.questions[Number(m[2])];
+        if (q) {
+          q.tags = String(rawValue)
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+        }
+        refreshAll({ rerenderEditor: false });
+        return;
+      }
+    }
+
+    if (inputType === "json-object" && path.endsWith(".__rubricJson")) {
+      const m = path.match(/^parts\.(\d+)\.questions\.(\d+)\.__rubricJson$/);
+      if (m) {
+        const q = state.parts[Number(m[1])]?.questions[Number(m[2])];
+        if (q) {
+          try {
+            const parsed = String(rawValue).trim() === "" ? {} : JSON.parse(rawValue);
+            if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+              q.rubricAllocation = parsed;
+            }
+          } catch (err) {
+            /* keep last valid value while user edits JSON */
+          }
+        }
+        refreshAll({ rerenderEditor: false });
+        return;
+      }
+    }
+
     if (path.match(/\.options\.\d+\.text$/)) {
       const m = path.match(/^(parts\.\d+\.questions\.\d+)\.options\.(\d+)\.text$/);
       if (m) {

@@ -24,12 +24,21 @@
       </div>`;
   };
 
-  ET.fieldTextarea = function (label, path, value, rows = 2) {
+  ET.fieldTextarea = function (label, path, value, rows = 2, attrs = "") {
     const id = `f-${path.replace(/\./g, "-")}`;
     return `
       <div class="editor-field editor-field--full">
         <label for="${id}">${label}</label>
-        <textarea id="${id}" data-path="${path}" rows="${rows}">${ET.escapeHtml(value ?? "")}</textarea>
+        <textarea id="${id}" data-path="${path}" rows="${rows}" ${attrs}>${ET.escapeHtml(value ?? "")}</textarea>
+      </div>`;
+  };
+
+  ET.fieldReadonlyJson = function (label, value, rows = 2) {
+    const text = typeof value === "string" ? value : JSON.stringify(value ?? [], null, 2);
+    return `
+      <div class="editor-field editor-field--full">
+        <label>${label}</label>
+        <textarea readonly rows="${rows}" class="editor-field__readonly">${ET.escapeHtml(text)}</textarea>
       </div>`;
   };
 
@@ -96,7 +105,10 @@
           ${linesField}
           ${ET.fieldText(ET.t("field.answerKeyPlaceholder"), `${base}.answerKey`, question.answerKey)}
           ${ET.fieldTextarea(ET.t("field.teacherNote"), `${base}.teacherNote`, question.teacherNote, 2)}
+          ${ET.fieldText(ET.t("field.tags"), `${base}.__tagsCsv`, (question.tags || []).join(", "), 'data-input-type="tags-csv"')}
+          ${ET.fieldTextarea(ET.t("field.rubricAllocation"), `${base}.__rubricJson`, JSON.stringify(question.rubricAllocation || {}, null, 2), 2, 'data-input-type="json-object"')}
         </div>
+        ${ET.fieldReadonlyJson(ET.t("field.attachmentsReadonly"), question.attachments || [], 2)}
         ${optionsHtml}
       </div>`;
   };

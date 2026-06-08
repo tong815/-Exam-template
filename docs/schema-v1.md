@@ -22,6 +22,19 @@ The schema is **not** tied to any grade, subject, region, or curriculum. Values 
 
 ---
 
+## `profile` vs `meta` — boundary
+
+| | `profile` | `meta` |
+|:--|:----------|:-------|
+| **Meaning** | Course / grade / subject **identity** — who this exam belongs to | **This instance** of an exam — title, date, teacher, paper |
+| **Changes** | Usually stable across tests in the same course | Changes every test you print |
+| **Examples** | `grade`, `subject`, `courseCode`, `courseName`, `region` | `testTitle`, `teacher`, `timeAllowed`, `schoolName`, `paperSize` |
+
+Do **not** put `courseCode` / `grade` / `subject` in `meta`.  
+Do **not** put `testTitle` / `teacher` / `timeAllowed` in `profile`.
+
+---
+
 ## `profile`
 
 Describes **which exam** this is. All fields are optional strings unless noted.
@@ -101,7 +114,28 @@ Parts are **not** limited to A/B/C/D. Use any `id` / `label` pattern.
 | `answerSpace` | answerSpace | optional | Student answer area |
 | `answerKey` | string | optional | Teacher answer placeholder |
 | `teacherNote` | string | optional | Internal note |
-| `tags` | string[] | optional | Skill / topic tags |
+| `tags` | string[] | optional | Topic / skill / difficulty tags for future analytics |
+| `attachments` | object[] | optional | Figures, tables, graphs (see below) |
+| `rubricAllocation` | object | optional | Per-question rubric weights, e.g. `{ "K": 2, "T": 1 }` |
+
+### `attachments[]` (placeholder rendering)
+
+| `type` | Fields | Preview behaviour |
+|:-------|:-------|:------------------|
+| `image` | `src`, `alt?` | Renders `<img>` if `src` present; else placeholder |
+| `table` | — | Placeholder text (no table engine yet) |
+| `graph` | — | Placeholder text (no graph engine yet) |
+| other | — | "Unsupported attachment type" |
+
+Example:
+
+```json
+{
+  "type": "image",
+  "src": "assets/graph-q5.png",
+  "alt": "Parabola sketch"
+}
+```
 
 ### Question types
 
