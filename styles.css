@@ -975,8 +975,8 @@ body.show-answer-key .question-block__answer-key {
   }
 
   .question-block {
-    break-inside: auto;
-    page-break-inside: auto;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .question-block--avoid-break {
@@ -987,6 +987,24 @@ body.show-answer-key .question-block__answer-key {
   .question-block--allow-split {
     break-inside: auto;
     page-break-inside: auto;
+  }
+
+  .question-block--force-next-page {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .question-block__header {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .options-list,
+  .answer-line,
+  .explanation-line,
+  .solution-space {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .exam-section__heading {

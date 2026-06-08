@@ -477,7 +477,18 @@
       updateFromField("meta.paperSize", paperSelect.value, "text");
     });
 
-    btnPrint.addEventListener("click", () => window.print());
+    btnPrint.addEventListener("click", () => {
+      if (typeof ET.applyQuestionPagination === "function") {
+        ET.applyQuestionPagination(examRoot);
+      }
+      window.print();
+    });
+
+    window.addEventListener("beforeprint", () => {
+      if (typeof ET.applyQuestionPagination === "function") {
+        ET.applyQuestionPagination(examRoot);
+      }
+    });
 
     btnAnswerKey.addEventListener("click", () => {
       const on = document.body.classList.toggle("show-answer-key");
