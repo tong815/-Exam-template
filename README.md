@@ -18,6 +18,7 @@ Exam-template/
 │  ├─ renderer.js
 │  ├─ storage.js
 │  ├─ schema.js             # schema、migrate、normalize、validate
+│  ├─ i18n.js               # 编辑器 UI 中英文（不影响试卷内容）
 │  ├─ templates.js          # 空白模板 + Profile 注册表（无科目内容）
 │  └─ profiles/
 │     └─ g11-functions.js  # G11 fallback + profile 注册
@@ -68,7 +69,26 @@ Exam-template/
 ExamToolkitAPI.validate()   // 当前试卷校验结果
 ExamToolkitAPI.migrate(raw)   // 仅迁移旧字段
 ExamToolkitAPI.normalize(raw) // 迁移 + 标准化
+ExamToolkitAPI.setLanguage("zh") // 切换编辑器界面语言
+ExamToolkitAPI.t("toolbar.save") // 翻译 key
 ```
+
+---
+
+## Editor UI Language / 编辑器界面语言
+
+工具栏 **界面语言 / Editor UI** 可在 **English** 与 **中文** 之间切换。
+
+| 会翻译 | 不会翻译 |
+|:-------|:---------|
+| 工具栏按钮与标签 | `examData` 中的题干 `stem` |
+| 左侧编辑器字段名、分区标题 | Instructions 正文 |
+| Validation 错误/警告说明 | 右侧 Preview 试卷内容 |
+| Toast、确认对话框 | Title Block、Part 标题/说明（考试内容） |
+
+- **默认语言：** 中文（`zh`）；若曾切换过，则读取 `localStorage` 键 `exam-template-editor-language`
+- **学生试卷语言** 完全由 `examData` 内容决定，界面语言**不会**自动翻译题目
+- 翻译字典：`src/i18n.js`（轻量 `ET.t(key, vars)`，无第三方 i18n 库）
 
 ---
 

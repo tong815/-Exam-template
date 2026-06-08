@@ -6,6 +6,25 @@
 
   ET.STORAGE_KEY = "exam-template-editor-v1";
   ET.STORAGE_PROFILE_KEY = "exam-template-active-profile";
+  ET.STORAGE_LANGUAGE_KEY = "exam-template-editor-language";
+
+  ET.getStoredLanguage = function () {
+    try {
+      const lang = localStorage.getItem(ET.STORAGE_LANGUAGE_KEY);
+      if (lang === "en" || lang === "zh") return lang;
+    } catch (err) {
+      console.warn("Could not read language preference:", err);
+    }
+    return "zh";
+  };
+
+  ET.saveLanguage = function (lang) {
+    try {
+      localStorage.setItem(ET.STORAGE_LANGUAGE_KEY, lang);
+    } catch (err) {
+      console.warn("Could not save language preference:", err);
+    }
+  };
 
   ET.saveToStorage = function (exam, profileId) {
     try {

@@ -16,10 +16,14 @@
   // UI helpers
   // ---------------------------------------------------------------------------
 
-  function showToast(message) {
+  function showToast(messageKeyOrText, vars) {
     const el = document.getElementById("toast");
     if (!el) return;
-    el.textContent = message;
+    const text =
+      typeof messageKeyOrText === "string" && messageKeyOrText.startsWith("toast.")
+        ? ET.t(messageKeyOrText, vars)
+        : messageKeyOrText;
+    el.textContent = text;
     el.classList.remove("is-hidden");
     clearTimeout(showToast._timer);
     showToast._timer = setTimeout(() => el.classList.add("is-hidden"), 2200);
@@ -40,14 +44,29 @@
   function syncToolbar() {
     const paperSelect = document.getElementById("paper-size");
     const profileSelect = document.getElementById("exam-profile");
+    const langSelect = document.getElementById("editor-language");
+
     if (paperSelect && paperSelect.value !== state.meta.paperSize) {
       paperSelect.value = state.meta.paperSize || "letter";
     }
     if (profileSelect && profileSelect.value !== activeProfileId) {
       profileSelect.value = activeProfileId;
     }
+    if (langSelect && langSelect.value !== ET.currentLanguage) {
+      langSelect.value = ET.currentLanguage;
+    }
+
     applyPaperSize(state.meta.paperSize || "letter");
-    document.title = `${state.meta.testTitle || "Exam"} — Editor & Preview`;
+    ET.applyToolbarI18n();
+    document.title = ET.t("app.documentTitle", {
+      title: state.meta.testTitle || "Exam",
+    });
+  }
+
+  function switchLanguage(lang) {
+    if (lang === ET.currentLanguage) return;
+    ET.setLanguage(lang);
+    refreshAll({ rerenderEditor: true });
   }
 
   // ---------------------------------------------------------------------------
@@ -60,10 +79,6 @@
 
   function refreshAll(options = {}) {
     const { rerenderEditor = true } = options;
-
-    ET.getEnabledParts(state).forEach((part) => {
-      /* ensure question objects stay materialized */
-    });
 
     const view = getBuiltView();
     const validation = ET.validateExamData(state);
@@ -170,7 +185,7 @@
       })
     );
     refreshAll({ rerenderEditor: true });
-    showToast("Part added");
+    showToast("toast.partAdded");
   }
 
   async function loadProfile(profileId) {
@@ -179,16 +194,16 @@
       state = await ET.loadExamProfile(profileId);
       applyPaperSize(state.meta.paperSize || "letter");
       refreshAll({ rerenderEditor: true });
-      showToast(`Loaded profile: ${ET.getProfileById(profileId).label}`);
+      showToast("toast.loadedProfile", { label: ET.getProfileById(profileId).label });
     } catch (err) {
       console.error(err);
-      showToast("Failed to load profile");
+      showToast("toast.loadProfileFailed");
     }
   }
 
   function resetToProfileDefault() {
     const label = ET.getProfileById(activeProfileId).label;
-    if (!confirm(`Reset to "${label}" default? Unsaved edits will be lost.`)) return;
+    if (!confirm(ET.t("confirm.reset", { label }))) return;
     loadProfile(activeProfileId);
   }
 
@@ -237,6 +252,7 @@
     const banner = document.getElementById("answer-key-banner");
     const paperSelect = document.getElementById("paper-size");
     const profileSelect = document.getElementById("exam-profile");
+    const langSelect = document.getElementById("editor-language");
 
     ET.EXAM_PROFILES.forEach((p) => {
       const opt = document.createElement("option");
@@ -247,15 +263,16 @@
 
     profileSelect.value = activeProfileId;
     profileSelect.addEventListener("change", () => {
-      if (
-        confirm(
-          `Load profile "${ET.getProfileById(profileSelect.value).label}"? Current unsaved edits may be replaced unless you exported a backup.`
-        )
-      ) {
+      const label = ET.getProfileById(profileSelect.value).label;
+      if (confirm(ET.t("confirm.loadProfile", { label }))) {
         loadProfile(profileSelect.value);
       } else {
         profileSelect.value = activeProfileId;
       }
+    });
+
+    langSelect.addEventListener("change", () => {
+      switchLanguage(langSelect.value);
     });
 
     paperSelect.addEventListener("change", () => {
@@ -277,13 +294,13 @@
 
     btnSave.addEventListener("click", () => {
       ET.saveToStorage(state, activeProfileId);
-      showToast("Saved to browser storage");
+      showToast("toast.saved");
     });
 
     btnReset.addEventListener("click", resetToProfileDefault);
     btnExport.addEventListener("click", () => {
       ET.exportExamJson(state);
-      showToast("Exported exam-data.json");
+      showToast("toast.exported");
     });
 
     btnImport.addEventListener("click", () => importFile.click());
@@ -296,9 +313,9 @@
         activeProfileId = "imported";
         applyPaperSize(state.meta.paperSize || "letter");
         refreshAll({ rerenderEditor: true });
-        showToast("Imported JSON successfully");
+        showToast("toast.imported");
       } catch (err) {
-        showToast("Import failed: invalid JSON");
+        showToast("toast.importFailed");
         console.error(err);
       }
     });
@@ -309,6 +326,7 @@
   // ---------------------------------------------------------------------------
 
   async function boot() {
+    ET.initLanguage();
     activeProfileId = ET.getStoredProfileId();
 
     const saved = ET.loadFromStorage(ET.createBlankExam());
@@ -332,6 +350,8 @@
       loadProfile,
       exportJson: () => ET.exportExamJson(state),
       setPaperSize: applyPaperSize,
+      setLanguage: switchLanguage,
+      t: ET.t,
     };
   }
 

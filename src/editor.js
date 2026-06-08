@@ -1,5 +1,5 @@
 /**
- * Structure editor UI.
+ * Structure editor UI (labels via i18n; exam content values unchanged).
  */
 (function (ET) {
   "use strict";
@@ -70,7 +70,9 @@
           ${(options.length ? options : ET.defaultMcOptions())
             .map((o, oi) =>
               ET.fieldText(
-                type === "matching" ? `Item ${o.key}` : `Option ${o.key}`,
+                type === "matching"
+                  ? ET.t("field.matchingItem", { key: o.key })
+                  : ET.t("field.option", { key: o.key }),
                 `${base}.options.${oi}.text`,
                 o.text,
                 `data-option-key="${o.key}"`
@@ -81,19 +83,19 @@
         : "";
 
     const linesField = ET.usesAnswerLines(type)
-      ? ET.fieldNumber("Answer space lines", `${base}.answerSpace.lines`, lines, 1, 40)
+      ? ET.fieldNumber(ET.t("field.answerSpaceLines"), `${base}.answerSpace.lines`, lines, 1, 40)
       : "";
 
     return `
       <div class="editor-question">
-        <div class="editor-question__head">Question ${qNum}</div>
+        <div class="editor-question__head">${ET.t("question.head", { num: qNum })}</div>
         <div class="editor-question__grid">
-          ${ET.fieldNumber("Marks", `${base}.marks`, question.marks, 0, 100)}
-          ${ET.fieldSelect("Type", `${base}.type`, type, ET.QUESTION_TYPES)}
-          ${ET.fieldTextarea("Stem (placeholder)", `${base}.stem`, question.stem, 2)}
+          ${ET.fieldNumber(ET.t("field.marks"), `${base}.marks`, question.marks, 0, 100)}
+          ${ET.fieldSelect(ET.t("field.type"), `${base}.type`, type, ET.getLocalizedQuestionTypes())}
+          ${ET.fieldTextarea(ET.t("field.stemPlaceholder"), `${base}.stem`, question.stem, 2)}
           ${linesField}
-          ${ET.fieldText("Answer key (placeholder)", `${base}.answerKey`, question.answerKey)}
-          ${ET.fieldTextarea("Teacher note", `${base}.teacherNote`, question.teacherNote, 2)}
+          ${ET.fieldText(ET.t("field.answerKeyPlaceholder"), `${base}.answerKey`, question.answerKey)}
+          ${ET.fieldTextarea(ET.t("field.teacherNote"), `${base}.teacherNote`, question.teacherNote, 2)}
         </div>
         ${optionsHtml}
       </div>`;
@@ -104,7 +106,11 @@
     const startQ = numbers[0] ?? "—";
     const endQ = numbers[numbers.length - 1] ?? "—";
     const rangeLabel =
-      numbers.length > 0 ? (numbers.length === 1 ? `Q${startQ}` : `Q${startQ}–Q${endQ}`) : "disabled";
+      numbers.length > 0
+        ? numbers.length === 1
+          ? `Q${startQ}`
+          : `Q${startQ}–Q${endQ}`
+        : ET.t("part.rangeDisabled");
 
     const built = view.parts.find((p) => p.id === part.id);
     const subtotal = built ? ET.sumMarks(built.questions) : 0;
@@ -113,28 +119,26 @@
     const questionsHtml =
       part.enabled && qCount > 0
         ? part.questions
-            .map((q, qi) =>
-              ET.renderQuestionEditor(partIndex, qi, numbers[qi] ?? "?", q, part)
-            )
+            .map((q, qi) => ET.renderQuestionEditor(partIndex, qi, numbers[qi] ?? "?", q, part))
             .join("")
-        : `<p class="editor-section__subtitle">No questions (part disabled or count is 0).</p>`;
+        : `<p class="editor-section__subtitle">${ET.escapeHtml(ET.t("part.noQuestions"))}</p>`;
 
     return `
       <div class="editor-part${part.enabled ? "" : " is-disabled"}" data-part-index="${partIndex}">
         <div class="editor-part__header">
-          <h3 class="editor-part__title">Part ${ET.escapeHtml(part.label)}</h3>
-          ${ET.fieldCheckbox("Enabled", `parts.${partIndex}.enabled`, part.enabled, `-en`)}
+          <h3 class="editor-part__title">${ET.escapeHtml(ET.t("part.title", { label: part.label }))}</h3>
+          ${ET.fieldCheckbox(ET.t("field.enabled"), `parts.${partIndex}.enabled`, part.enabled, `-en`)}
         </div>
-        <p class="editor-part__meta">Range: <strong>${rangeLabel}</strong> &nbsp;|&nbsp; Subtotal: <strong>${subtotal}</strong> marks</p>
-        ${ET.fieldText("Label", `parts.${partIndex}.label`, part.label)}
-        ${ET.fieldText("Title", `parts.${partIndex}.title`, part.title)}
-        ${ET.fieldTextarea("Description", `parts.${partIndex}.description`, part.description, 3)}
+        <p class="editor-part__meta">${ET.escapeHtml(ET.t("part.range", { range: rangeLabel, subtotal }))}</p>
+        ${ET.fieldText(ET.t("field.label"), `parts.${partIndex}.label`, part.label)}
+        ${ET.fieldText(ET.t("field.title"), `parts.${partIndex}.title`, part.title)}
+        ${ET.fieldTextarea(ET.t("field.description"), `parts.${partIndex}.description`, part.description, 3)}
         <div class="editor-question__grid">
-          ${ET.fieldNumber("# Questions", `parts.${partIndex}.__questionCount`, qCount, 0, 50)}
-          ${ET.fieldSelect("Default type", `parts.${partIndex}.defaultQuestionType`, part.defaultQuestionType, ET.QUESTION_TYPES)}
-          ${ET.fieldNumber("Default marks", `parts.${partIndex}.defaultMarks`, part.defaultMarks, 0, 100)}
-          ${ET.fieldNumber("Default answer lines", `parts.${partIndex}.defaultAnswerSpace.lines`, part.defaultAnswerSpace?.lines ?? 0, 0, 40)}
-          ${ET.fieldCheckbox("Page break before", `parts.${partIndex}.pageBreakBefore`, part.pageBreakBefore, `-pb`)}
+          ${ET.fieldNumber(ET.t("field.questionCount"), `parts.${partIndex}.__questionCount`, qCount, 0, 50)}
+          ${ET.fieldSelect(ET.t("field.defaultType"), `parts.${partIndex}.defaultQuestionType`, part.defaultQuestionType, ET.getLocalizedQuestionTypes())}
+          ${ET.fieldNumber(ET.t("field.defaultMarks"), `parts.${partIndex}.defaultMarks`, part.defaultMarks, 0, 100)}
+          ${ET.fieldNumber(ET.t("field.defaultAnswerLines"), `parts.${partIndex}.defaultAnswerSpace.lines`, part.defaultAnswerSpace?.lines ?? 0, 0, 40)}
+          ${ET.fieldCheckbox(ET.t("field.pageBreakBefore"), `parts.${partIndex}.pageBreakBefore`, part.pageBreakBefore, `-pb`)}
         </div>
         ${questionsHtml}
       </div>`;
@@ -151,32 +155,39 @@
         : "validation-summary--ok";
     const statusIcon = hasErrors ? "❌" : hasWarnings ? "⚠️" : "✅";
     const statusText = hasErrors
-      ? `${v.errors.length} error(s), ${v.warnings.length} warning(s)`
+      ? ET.t("validation.errorAndWarningCount", {
+          errors: v.errors.length,
+          warnings: v.warnings.length,
+        })
       : hasWarnings
-        ? `Schema valid with ${v.warnings.length} warning(s)`
-        : "Schema valid";
+        ? ET.t("validation.schemaValidWithWarnings", { count: v.warnings.length })
+        : ET.t("validation.schemaValid");
 
     const errorList =
       v.errors.length > 0
-        ? `<ul class="validation-summary__list validation-summary__list--errors">${v.errors.map((e) => `<li>${ET.escapeHtml(e)}</li>`).join("")}</ul>`
+        ? `<ul class="validation-summary__list validation-summary__list--errors">${v.errors
+            .map((e) => `<li>${ET.escapeHtml(ET.formatValidationIssue(e))}</li>`)
+            .join("")}</ul>`
         : "";
     const warnList =
       v.warnings.length > 0
-        ? `<ul class="validation-summary__list validation-summary__list--warnings">${v.warnings.map((w) => `<li>${ET.escapeHtml(w)}</li>`).join("")}</ul>`
+        ? `<ul class="validation-summary__list validation-summary__list--warnings">${v.warnings
+            .map((w) => `<li>${ET.escapeHtml(ET.formatValidationIssue(w))}</li>`)
+            .join("")}</ul>`
         : "";
 
     return `
       <details class="validation-summary ${statusClass}" open>
         <summary class="validation-summary__head">
           <span class="validation-summary__icon">${statusIcon}</span>
-          <span class="validation-summary__title">Validation</span>
+          <span class="validation-summary__title">${ET.escapeHtml(ET.t("section.validation"))}</span>
           <span class="validation-summary__status">${ET.escapeHtml(statusText)}</span>
         </summary>
         <div class="validation-summary__body">
-          ${hasErrors ? `<p class="validation-summary__label">Errors</p>${errorList}` : ""}
-          ${hasWarnings ? `<p class="validation-summary__label">Warnings</p>${warnList}` : ""}
-          ${!hasErrors && !hasWarnings ? `<p class="validation-summary__hint">No issues detected.</p>` : ""}
-          ${hasErrors ? `<p class="validation-summary__hint">Preview and print remain available; fix errors before exporting final exams.</p>` : ""}
+          ${hasErrors ? `<p class="validation-summary__label">${ET.escapeHtml(ET.t("validation.errors"))}</p>${errorList}` : ""}
+          ${hasWarnings ? `<p class="validation-summary__label">${ET.escapeHtml(ET.t("validation.warnings"))}</p>${warnList}` : ""}
+          ${!hasErrors && !hasWarnings ? `<p class="validation-summary__hint">${ET.escapeHtml(ET.t("validation.noIssues"))}</p>` : ""}
+          ${hasErrors ? `<p class="validation-summary__hint">${ET.escapeHtml(ET.t("validation.fixBeforeExport"))}</p>` : ""}
         </div>
       </details>`;
   };
@@ -195,64 +206,64 @@
       ${ET.renderValidationSummary(validation)}
 
       <section class="editor-section">
-        <h2 class="editor-section__title">Exam Profile</h2>
-        ${ET.fieldText("Exam ID", "examId", exam.examId)}
+        <h2 class="editor-section__title">${ET.escapeHtml(ET.t("section.examProfile"))}</h2>
+        ${ET.fieldText(ET.t("field.examId"), "examId", exam.examId)}
         <div class="editor-question__grid">
-          ${ET.fieldText("Grade", "profile.grade", p.grade)}
-          ${ET.fieldText("Subject", "profile.subject", p.subject)}
-          ${ET.fieldText("Course code", "profile.courseCode", p.courseCode)}
-          ${ET.fieldText("Course name", "profile.courseName", p.courseName)}
-          ${ET.fieldText("Region", "profile.region", p.region)}
-          ${ET.fieldText("Language", "profile.language", p.language)}
+          ${ET.fieldText(ET.t("field.grade"), "profile.grade", p.grade)}
+          ${ET.fieldText(ET.t("field.subject"), "profile.subject", p.subject)}
+          ${ET.fieldText(ET.t("field.courseCode"), "profile.courseCode", p.courseCode)}
+          ${ET.fieldText(ET.t("field.courseName"), "profile.courseName", p.courseName)}
+          ${ET.fieldText(ET.t("field.region"), "profile.region", p.region)}
+          ${ET.fieldText(ET.t("field.language"), "profile.language", p.language)}
         </div>
       </section>
 
       <section class="editor-section">
-        <h2 class="editor-section__title">Exam Meta</h2>
-        ${ET.fieldText("School Name", "meta.schoolName", m.schoolName)}
-        ${ET.fieldText("Test Title", "meta.testTitle", m.testTitle)}
-        ${ET.fieldText("Student name label", "meta.studentNameLabel", m.studentNameLabel)}
-        ${ET.fieldText("Date label", "meta.dateLabel", m.dateLabel)}
-        ${ET.fieldText("Time Allowed", "meta.timeAllowed", m.timeAllowed)}
+        <h2 class="editor-section__title">${ET.escapeHtml(ET.t("section.examMeta"))}</h2>
+        ${ET.fieldText(ET.t("field.schoolName"), "meta.schoolName", m.schoolName)}
+        ${ET.fieldText(ET.t("field.testTitle"), "meta.testTitle", m.testTitle)}
+        ${ET.fieldText(ET.t("field.studentNameLabel"), "meta.studentNameLabel", m.studentNameLabel)}
+        ${ET.fieldText(ET.t("field.dateLabel"), "meta.dateLabel", m.dateLabel)}
+        ${ET.fieldText(ET.t("field.timeAllowed"), "meta.timeAllowed", m.timeAllowed)}
         <div class="editor-field">
-          <label>Total Marks (auto)</label>
+          <label>${ET.escapeHtml(ET.t("field.totalMarksAuto"))}</label>
           <input type="text" readonly value="${view.meta.totalMarks}">
         </div>
-        ${ET.fieldText("Teacher", "meta.teacher", m.teacher)}
-        ${ET.fieldSelect("Calculator Policy", "meta.calculatorPolicy", m.calculatorPolicy, [
-          { value: "ALLOWED", label: "ALLOWED" },
-          { value: "NOT ALLOWED", label: "NOT ALLOWED" },
+        ${ET.fieldText(ET.t("field.teacher"), "meta.teacher", m.teacher)}
+        ${ET.fieldSelect(ET.t("field.calculatorPolicy"), "meta.calculatorPolicy", m.calculatorPolicy, [
+          { value: "ALLOWED", label: ET.t("policy.ALLOWED") },
+          { value: "NOT ALLOWED", label: ET.t("policy.NOT_ALLOWED") },
         ])}
-        ${ET.fieldSelect("Paper Size", "meta.paperSize", m.paperSize, [
-          { value: "letter", label: "Letter" },
-          { value: "a4", label: "A4" },
+        ${ET.fieldSelect(ET.t("field.paperSize"), "meta.paperSize", m.paperSize, [
+          { value: "letter", label: ET.t("paper.letter") },
+          { value: "a4", label: ET.t("paper.a4") },
         ])}
       </section>
 
       <section class="editor-section">
-        <h2 class="editor-section__title">Display Settings</h2>
-        ${ET.fieldCheckbox("Show instructions", "settings.showInstructions", exam.settings.showInstructions !== false, "-si")}
-        ${ET.fieldCheckbox("Show mark distribution", "settings.showMarkDistribution", exam.settings.showMarkDistribution !== false, "-sm")}
-        ${ET.fieldCheckbox("Show bonus section", "settings.showBonus", !!exam.settings.showBonus, "-sb")}
-        ${ET.fieldCheckbox("Auto-number questions", "settings.autoNumberQuestions", exam.settings.autoNumberQuestions !== false, "-an")}
+        <h2 class="editor-section__title">${ET.escapeHtml(ET.t("section.displaySettings"))}</h2>
+        ${ET.fieldCheckbox(ET.t("field.showInstructions"), "settings.showInstructions", exam.settings.showInstructions !== false, "-si")}
+        ${ET.fieldCheckbox(ET.t("field.showMarkDistribution"), "settings.showMarkDistribution", exam.settings.showMarkDistribution !== false, "-sm")}
+        ${ET.fieldCheckbox(ET.t("field.showBonus"), "settings.showBonus", !!exam.settings.showBonus, "-sb")}
+        ${ET.fieldCheckbox(ET.t("field.autoNumberQuestions"), "settings.autoNumberQuestions", exam.settings.autoNumberQuestions !== false, "-an")}
       </section>
 
       <section class="editor-section">
-        <h2 class="editor-section__title">Part Structure</h2>
-        <p class="editor-section__subtitle">Question numbers update automatically across enabled parts.</p>
+        <h2 class="editor-section__title">${ET.escapeHtml(ET.t("section.partStructure"))}</h2>
+        <p class="editor-section__subtitle">${ET.escapeHtml(ET.t("part.structureHint"))}</p>
         ${partsHtml}
-        <button type="button" class="btn btn--secondary" data-action="add-part" style="margin-top:0.5rem;width:100%">+ Add Part</button>
+        <button type="button" class="btn btn--secondary" data-action="add-part" style="margin-top:0.5rem;width:100%">${ET.escapeHtml(ET.t("field.addPart"))}</button>
       </section>
 
       <section class="editor-section">
-        <h2 class="editor-section__title">Bonus Question (Optional)</h2>
-        ${ET.fieldCheckbox("Enabled", "bonus.enabled", exam.bonus.enabled, "-bonus")}
-        ${ET.fieldText("Label", "bonus.label", exam.bonus.label)}
-        ${ET.fieldText("Marks label", "bonus.marks", exam.bonus.marks)}
-        ${ET.fieldTextarea("Stem (placeholder)", "bonus.stem", exam.bonus.stem, 2)}
-        ${ET.fieldNumber("Answer space lines", "bonus.answerSpace.lines", exam.bonus.answerSpace?.lines ?? 3, 1, 40)}
-        ${ET.fieldText("Answer key (placeholder)", "bonus.answerKey", exam.bonus.answerKey)}
-        ${ET.fieldTextarea("Teacher note", "bonus.teacherNote", exam.bonus.teacherNote, 2)}
+        <h2 class="editor-section__title">${ET.escapeHtml(ET.t("section.bonus"))}</h2>
+        ${ET.fieldCheckbox(ET.t("field.enabled"), "bonus.enabled", exam.bonus.enabled, "-bonus")}
+        ${ET.fieldText(ET.t("field.label"), "bonus.label", exam.bonus.label)}
+        ${ET.fieldText(ET.t("field.marksLabel"), "bonus.marks", exam.bonus.marks)}
+        ${ET.fieldTextarea(ET.t("field.stemPlaceholder"), "bonus.stem", exam.bonus.stem, 2)}
+        ${ET.fieldNumber(ET.t("field.answerSpaceLines"), "bonus.answerSpace.lines", exam.bonus.answerSpace?.lines ?? 3, 1, 40)}
+        ${ET.fieldText(ET.t("field.answerKeyPlaceholder"), "bonus.answerKey", exam.bonus.answerKey)}
+        ${ET.fieldTextarea(ET.t("field.teacherNote"), "bonus.teacherNote", exam.bonus.teacherNote, 2)}
       </section>`;
   };
 })(window.ExamToolkit);

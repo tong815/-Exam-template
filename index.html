@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-paper="letter">
+<html lang="zh-CN" data-paper="letter">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,31 +9,38 @@
 <body>
   <header class="toolbar no-print" role="toolbar" aria-label="Exam editor controls">
     <div class="toolbar__brand">
-      <span class="toolbar__title">Exam Template Editor</span>
-      <span class="toolbar__subtitle">generic structure editor &amp; print preview</span>
+      <span class="toolbar__title" data-i18n="app.title">Exam Template Editor</span>
+      <span class="toolbar__subtitle" data-i18n="app.subtitle">generic structure editor &amp; print preview</span>
     </div>
     <div class="toolbar__actions">
       <label class="toolbar__select">
-        Profile
-        <select id="exam-profile" aria-label="Load exam profile"></select>
+        <span data-i18n="toolbar.profile">Profile</span>
+        <select id="exam-profile" data-i18n-aria="toolbar.profile"></select>
       </label>
       <label class="toolbar__select">
-        Paper
-        <select id="paper-size" aria-label="Paper size">
+        <span data-i18n="toolbar.paper">Paper</span>
+        <select id="paper-size" data-i18n-aria="toolbar.paper">
           <option value="letter" selected>Letter</option>
           <option value="a4">A4</option>
         </select>
       </label>
-      <button type="button" id="btn-save" class="btn btn--secondary">Save</button>
-      <button type="button" id="btn-reset" class="btn btn--secondary">Reset to Default</button>
-      <button type="button" id="btn-export" class="btn btn--secondary">Export JSON</button>
-      <button type="button" id="btn-import" class="btn btn--secondary">Import JSON</button>
+      <label class="toolbar__select">
+        <span data-i18n="toolbar.editorLanguage">Editor UI</span>
+        <select id="editor-language" data-i18n-aria="toolbar.editorLanguage">
+          <option value="en">English</option>
+          <option value="zh" selected>中文</option>
+        </select>
+      </label>
+      <button type="button" id="btn-save" class="btn btn--secondary" data-i18n="toolbar.save">Save</button>
+      <button type="button" id="btn-reset" class="btn btn--secondary" data-i18n="toolbar.reset">Reset to Default</button>
+      <button type="button" id="btn-export" class="btn btn--secondary" data-i18n="toolbar.export">Export JSON</button>
+      <button type="button" id="btn-import" class="btn btn--secondary" data-i18n="toolbar.import">Import JSON</button>
       <input type="file" id="import-file" class="is-hidden" accept=".json,application/json">
-      <button type="button" id="btn-print" class="btn btn--primary">Print / Save as PDF</button>
-      <button type="button" id="btn-answer-key" class="btn btn--secondary" aria-pressed="false">
+      <button type="button" id="btn-print" class="btn btn--primary" data-i18n="toolbar.print">Print / Save as PDF</button>
+      <button type="button" id="btn-answer-key" class="btn btn--secondary" aria-pressed="false" data-i18n="toolbar.answerKey">
         Toggle Answer Key Preview
       </button>
-      <button type="button" id="btn-teacher-notes" class="btn btn--secondary" aria-pressed="false">
+      <button type="button" id="btn-teacher-notes" class="btn btn--secondary" aria-pressed="false" data-i18n="toolbar.teacherNotes">
         Toggle Teacher Notes
       </button>
     </div>
@@ -43,7 +50,7 @@
     <aside id="editor-root" class="editor-panel no-print" aria-label="Exam structure editor"></aside>
 
     <div class="preview-pane">
-      <div id="answer-key-banner" class="answer-key-banner no-print is-hidden" role="status">
+      <div id="answer-key-banner" class="answer-key-banner no-print is-hidden" role="status" data-i18n="banner.answerKey">
         Answer Key Preview — placeholder answers shown below each question
       </div>
       <main id="exam-root" class="exam-document" aria-live="polite"></main>
@@ -53,6 +60,7 @@
   <div id="toast" class="toast no-print is-hidden" role="status"></div>
 
   <script src="src/schema.js"></script>
+  <script src="src/i18n.js"></script>
   <script src="src/templates.js"></script>
   <script src="src/profiles/g11-functions.js"></script>
   <script src="src/storage.js"></script>

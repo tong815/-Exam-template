@@ -553,31 +553,47 @@
 
   ET.KNOWN_QUESTION_TYPES = ET.QUESTION_TYPES.map((t) => t.value);
 
+  ET.validationIssue = function (level, code, vars, message) {
+    return { level, code, vars: vars || {}, message: message || code };
+  };
+
   ET.validateExamData = function (exam) {
     const errors = [];
     const warnings = [];
 
-    if (!exam || typeof exam !== "object") {
-      return { ok: false, errors: ["Exam data is null or not an object"], warnings: [] };
+    function pushError(code, vars, message) {
+      errors.push(ET.validationIssue("error", code, vars, message));
     }
 
-    if (!exam.schemaVersion) errors.push("Missing schemaVersion");
-    if (!exam.examId) errors.push("Missing examId");
-    if (!exam.meta || typeof exam.meta !== "object") errors.push("Missing meta object");
+    function pushWarning(code, vars, message) {
+      warnings.push(ET.validationIssue("warning", code, vars, message));
+    }
+
+    if (!exam || typeof exam !== "object") {
+      return {
+        ok: false,
+        errors: [ET.validationIssue("error", "examNotObject", {}, "Exam data is null or not an object")],
+        warnings: [],
+      };
+    }
+
+    if (!exam.schemaVersion) pushError("missingSchemaVersion", {}, "Missing schemaVersion");
+    if (!exam.examId) pushError("missingExamId", {}, "Missing examId");
+    if (!exam.meta || typeof exam.meta !== "object") pushError("missingMeta", {}, "Missing meta object");
 
     if (!Array.isArray(exam.parts)) {
-      errors.push("parts must be an array");
+      pushError("partsNotArray", {}, "parts must be an array");
     } else {
       const globalQuestionIds = new Map();
 
       exam.parts.forEach((part, pi) => {
         const pfx = `parts[${pi}]`;
 
-        if (!part.id) errors.push(`${pfx}: missing part id`);
-        if (!part.title) warnings.push(`${pfx}: missing part title`);
+        if (!part.id) pushError("missingPartId", { path: pfx }, `${pfx}: missing part id`);
+        if (!part.title) pushWarning("missingPartTitle", { path: pfx }, `${pfx}: missing part title`);
 
         if (!Array.isArray(part.questions)) {
-          errors.push(`${pfx}: questions must be an array`);
+          pushError("questionsNotArray", { path: pfx }, `${pfx}: questions must be an array`);
           return;
         }
 
@@ -587,46 +603,52 @@
         part.questions.forEach((q, qi) => {
           const qfx = `${pfx}.questions[${qi}]`;
 
-          if (!q.type) errors.push(`${qfx}: missing question type`);
+          if (!q.type) pushError("missingQuestionType", { path: qfx }, `${qfx}: missing question type`);
           if (q.stem == null || String(q.stem).trim() === "") {
-            warnings.push(`${qfx}: empty stem`);
+            pushWarning("emptyStem", { path: qfx }, `${qfx}: empty stem`);
           }
 
           if (q.marks == null || q.marks === "") {
-            errors.push(`${qfx}: missing marks`);
+            pushError("missingMarks", { path: qfx }, `${qfx}: missing marks`);
           } else {
             const marks = Number(q.marks);
             if (Number.isNaN(marks) || marks < 0) {
-              errors.push(`${qfx}: marks must be a number >= 0`);
+              pushError("invalidMarks", { path: qfx }, `${qfx}: marks must be a number >= 0`);
             }
           }
 
           if (q.answerSpace != null) {
             const lines = Number(q.answerSpace.lines);
             if (q.answerSpace.lines != null && (Number.isNaN(lines) || lines < 0)) {
-              errors.push(`${qfx}: answerSpace.lines must be a number >= 0`);
+              pushError("invalidAnswerLines", { path: qfx }, `${qfx}: answerSpace.lines must be a number >= 0`);
             }
           }
 
           if (q.type === "multiple-choice") {
             const opts = ET.normalizeOptions(q.options);
             if (opts.length < 2) {
-              errors.push(`${qfx}: multiple-choice requires at least 2 options`);
+              pushError("mcMinOptions", { path: qfx }, `${qfx}: multiple-choice requires at least 2 options`);
             }
           }
 
           if (q.type && !ET.KNOWN_QUESTION_TYPES.includes(q.type)) {
-            warnings.push(`${qfx}: unknown question type "${q.type}"`);
+            pushWarning("unknownQuestionType", { path: qfx, type: q.type }, `${qfx}: unknown question type "${q.type}"`);
           }
 
           if (q.id) {
             if (partEnabled && partQuestionIds.has(q.id)) {
-              errors.push(`${pfx}: duplicate question id "${q.id}" within enabled part`);
+              pushError(
+                "duplicatePartQuestionId",
+                { path: pfx, id: q.id },
+                `${pfx}: duplicate question id "${q.id}" within enabled part`
+              );
             }
             partQuestionIds.add(q.id);
 
             if (globalQuestionIds.has(q.id)) {
-              errors.push(
+              pushError(
+                "duplicateGlobalQuestionId",
+                { id: q.id, first: globalQuestionIds.get(q.id), second: qfx },
                 `Duplicate global question id "${q.id}" (${globalQuestionIds.get(q.id)} and ${qfx})`
               );
             } else {
@@ -639,14 +661,14 @@
 
     try {
       const total = ET.buildExamView(exam).meta.totalMarks;
-      if (total === 0) warnings.push("Total marks is 0 for enabled parts");
+      if (total === 0) pushWarning("totalMarksZero", {}, "Total marks is 0 for enabled parts");
     } catch (err) {
-      warnings.push("Could not compute total marks for validation");
+      pushWarning("totalMarksComputeFailed", {}, "Could not compute total marks for validation");
     }
 
     const enabledParts = ET.getEnabledParts(exam);
     if (enabledParts.length === 0) {
-      warnings.push("No enabled parts — preview will show title/instructions only");
+      pushWarning("noEnabledParts", {}, "No enabled parts — preview will show title/instructions only");
     }
 
     return {
