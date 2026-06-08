@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0",
+  "examId": "minimal-exam",
+  "profile": {
+    "grade": "",
+    "subject": "General",
+    "courseCode": "",
+    "courseName": "",
+    "region": "",
+    "language": "en"
+  },
+  "meta": {
+    "schoolName": "Sample School",
+    "testTitle": "Minimal Sample Test",
+    "studentNameLabel": "Student Name",
+    "dateLabel": "Date",
+    "timeAllowed": "30 minutes",
+    "teacher": "Teacher Name",
+    "calculatorPolicy": "NOT ALLOWED",
+    "paperSize": "letter"
+  },
+  "instructions": [
+    "Answer the question below.",
+    "Calculators: NOT ALLOWED — confirm policy before the test."
+  ],
+  "parts": [
+    {
+      "id": "part-1",
+      "label": "1",
+      "enabled": true,
+      "title": "Single Question",
+      "description": "",
+      "defaultQuestionType": "short-answer",
+      "defaultMarks": 5,
+      "defaultAnswerSpace": { "type": "blank", "lines": 0 },
+      "pageBreakBefore": false,
+      "questions": [
+        {
+          "id": "min-q1",
+          "type": "short-answer",
+          "marks": 5,
+          "stem": "What is 2 + 2?",
+          "options": [],
+          "answerSpace": { "type": "blank", "lines": 0 },
+          "answerKey": "4",
+          "teacherNote": "",
+          "tags": []
+        }
+      ]
+    }
+  ],
+  "bonus": {
+    "enabled": false,
+    "id": "bonus-1",
+    "label": "B1",
+    "marks": "+1",
+    "stem": "",
+    "answerSpace": { "type": "lines", "lines": 2 },
+    "answerKey": "",
+    "teacherNote": ""
+  },
+  "rubric": {},
+  "settings": {
+    "showMarkDistribution": true,
+    "showInstructions": true,
+    "showBonus": false,
+    "autoNumberQuestions": true
+  }
+}

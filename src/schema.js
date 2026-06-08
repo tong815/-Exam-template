@@ -163,41 +163,121 @@
     return ET.defaultAnswerSpaceForType(type);
   };
 
-  /** Migrate legacy editor config or partial JSON into current schema. */
+  // ---------------------------------------------------------------------------
+  // migrateExamData — legacy field transforms only (no default filling)
+  // ---------------------------------------------------------------------------
+
+  ET.migrateExamData = function (raw) {
+    if (!raw || typeof raw !== "object") return {};
+
+    const migrated = ET.deepClone(raw);
+
+    if (!migrated.schemaVersion) migrated.schemaVersion = ET.SCHEMA_VERSION;
+
+    if (migrated.meta && typeof migrated.meta === "object") {
+      if (!migrated.profile) migrated.profile = {};
+      migrated.meta = ET.migrateMeta(migrated.meta, migrated.profile);
+    }
+
+    if (Array.isArray(migrated.parts)) {
+      migrated.parts = migrated.parts.map((p) => ET.migratePart(p));
+    }
+
+    if (migrated.bonus && typeof migrated.bonus === "object") {
+      migrated.bonus = ET.migrateBonusRaw(migrated.bonus);
+    }
+
+    return migrated;
+  };
+
+  /** Legacy meta.course → profile hints; strip computed fields. */
+  ET.migrateMeta = function (meta, profile) {
+    const m = { ...meta };
+    if (m.course && typeof m.course === "string") {
+      if (!profile) profile = {};
+      if (!profile.courseName && !profile.courseCode) {
+        const parts = m.course.split("/").map((s) => s.trim());
+        if (parts.length >= 2 && !profile.grade) profile.grade = parts[0];
+        if (!profile.courseCode && parts[parts.length - 1]) {
+          profile.courseCode = parts[parts.length - 1];
+        }
+      }
+    }
+    delete m.course;
+    delete m.totalMarks;
+    delete m.courseLine;
+    return m;
+  };
+
+  ET.migratePart = function (raw) {
+    const p = ET.deepClone(raw);
+    if (p.questionType && !p.defaultQuestionType) p.defaultQuestionType = p.questionType;
+    if (p.defaultSolutionLines != null && p.defaultAnswerSpace == null) {
+      p.defaultAnswerSpace = { type: "lines", lines: Number(p.defaultSolutionLines) || 0 };
+    }
+    delete p.questionType;
+    delete p.defaultSolutionLines;
+    /* questionCount kept for normalizePart legacy expansion */
+
+    if (Array.isArray(p.questions)) {
+      p.questions = p.questions.map((q) => ET.migrateQuestionRaw(q, p));
+    }
+    return p;
+  };
+
+  ET.migrateQuestionRaw = function (raw, part) {
+    const q = ET.deepClone(raw);
+    if (q.solutionLines != null && q.answerSpace == null) {
+      q.answerSpace = { type: "lines", lines: Number(q.solutionLines) || 0 };
+    }
+    delete q.solutionLines;
+    if (q.options && !Array.isArray(q.options) && typeof q.options === "object") {
+      q.options = Object.entries(q.options).map(([key, text]) => ({ key, text: String(text) }));
+    }
+    if (!q.type && part?.defaultQuestionType) q.type = part.defaultQuestionType;
+    return q;
+  };
+
+  ET.migrateBonusRaw = function (raw) {
+    const b = ET.deepClone(raw);
+    if (b.number && !b.label) b.label = b.number;
+    delete b.number;
+    if (b.solutionLines != null && b.answerSpace == null) {
+      b.answerSpace = { type: "lines", lines: Number(b.solutionLines) || 0 };
+    }
+    delete b.solutionLines;
+    return b;
+  };
+
+  // ---------------------------------------------------------------------------
+  // normalizeExamData — defaults, merge, structural standardization
+  // ---------------------------------------------------------------------------
+
   ET.normalizeExamData = function (raw, fallback) {
     const base = ET.deepClone(fallback || ET.createBlankExam());
     if (!raw || typeof raw !== "object") return base;
 
+    const migrated = ET.migrateExamData(raw);
     const data = ET.deepClone(base);
 
-    data.schemaVersion = raw.schemaVersion || ET.SCHEMA_VERSION;
-    data.examId = raw.examId || data.examId;
-    if (raw.profile) Object.assign(data.profile, raw.profile);
-    if (raw.meta) Object.assign(data.meta, ET.migrateMeta(raw.meta));
-    if (Array.isArray(raw.instructions)) data.instructions = raw.instructions;
-    if (raw.rubric) data.rubric = raw.rubric;
-    if (raw.settings) Object.assign(data.settings, raw.settings);
+    data.schemaVersion = migrated.schemaVersion || ET.SCHEMA_VERSION;
+    data.examId = migrated.examId || data.examId;
+    if (migrated.profile) Object.assign(data.profile, migrated.profile);
+    if (migrated.meta) Object.assign(data.meta, migrated.meta);
+    if (Array.isArray(migrated.instructions)) data.instructions = migrated.instructions;
+    if (migrated.rubric) data.rubric = migrated.rubric;
+    if (migrated.settings) Object.assign(data.settings, migrated.settings);
 
-    if (Array.isArray(raw.parts)) {
-      data.parts = raw.parts.map((p, i) => ET.normalizePart(p, i, data.parts[i]));
+    if (Array.isArray(migrated.parts)) {
+      data.parts = migrated.parts.map((p, i) => ET.normalizePart(p, i, data.parts[i]));
     }
 
-    if (raw.bonus) {
-      data.bonus = ET.normalizeBonus(raw.bonus, data.bonus);
-      data.settings.showBonus = raw.bonus.enabled ?? data.settings.showBonus;
+    if (migrated.bonus) {
+      data.bonus = ET.normalizeBonus(migrated.bonus, data.bonus);
+      if (migrated.bonus.enabled != null) data.settings.showBonus = !!migrated.bonus.enabled;
     }
 
     return data;
-  };
-
-  ET.migrateMeta = function (meta) {
-    const m = { ...meta };
-    if (meta.course && !m.testTitle) {
-      /* legacy combined course field — keep in profile via separate migration */
-    }
-    delete m.course;
-    delete m.totalMarks;
-    return m;
   };
 
   ET.normalizePart = function (raw, index, fallbackPart) {
@@ -465,5 +545,114 @@
       cur = cur[keys[i]];
     }
     cur[keys[keys.length - 1]] = value;
+  };
+
+  // ---------------------------------------------------------------------------
+  // validateExamData — non-blocking checks (errors / warnings)
+  // ---------------------------------------------------------------------------
+
+  ET.KNOWN_QUESTION_TYPES = ET.QUESTION_TYPES.map((t) => t.value);
+
+  ET.validateExamData = function (exam) {
+    const errors = [];
+    const warnings = [];
+
+    if (!exam || typeof exam !== "object") {
+      return { ok: false, errors: ["Exam data is null or not an object"], warnings: [] };
+    }
+
+    if (!exam.schemaVersion) errors.push("Missing schemaVersion");
+    if (!exam.examId) errors.push("Missing examId");
+    if (!exam.meta || typeof exam.meta !== "object") errors.push("Missing meta object");
+
+    if (!Array.isArray(exam.parts)) {
+      errors.push("parts must be an array");
+    } else {
+      const globalQuestionIds = new Map();
+
+      exam.parts.forEach((part, pi) => {
+        const pfx = `parts[${pi}]`;
+
+        if (!part.id) errors.push(`${pfx}: missing part id`);
+        if (!part.title) warnings.push(`${pfx}: missing part title`);
+
+        if (!Array.isArray(part.questions)) {
+          errors.push(`${pfx}: questions must be an array`);
+          return;
+        }
+
+        const partQuestionIds = new Set();
+        const partEnabled = part.enabled !== false;
+
+        part.questions.forEach((q, qi) => {
+          const qfx = `${pfx}.questions[${qi}]`;
+
+          if (!q.type) errors.push(`${qfx}: missing question type`);
+          if (q.stem == null || String(q.stem).trim() === "") {
+            warnings.push(`${qfx}: empty stem`);
+          }
+
+          if (q.marks == null || q.marks === "") {
+            errors.push(`${qfx}: missing marks`);
+          } else {
+            const marks = Number(q.marks);
+            if (Number.isNaN(marks) || marks < 0) {
+              errors.push(`${qfx}: marks must be a number >= 0`);
+            }
+          }
+
+          if (q.answerSpace != null) {
+            const lines = Number(q.answerSpace.lines);
+            if (q.answerSpace.lines != null && (Number.isNaN(lines) || lines < 0)) {
+              errors.push(`${qfx}: answerSpace.lines must be a number >= 0`);
+            }
+          }
+
+          if (q.type === "multiple-choice") {
+            const opts = ET.normalizeOptions(q.options);
+            if (opts.length < 2) {
+              errors.push(`${qfx}: multiple-choice requires at least 2 options`);
+            }
+          }
+
+          if (q.type && !ET.KNOWN_QUESTION_TYPES.includes(q.type)) {
+            warnings.push(`${qfx}: unknown question type "${q.type}"`);
+          }
+
+          if (q.id) {
+            if (partEnabled && partQuestionIds.has(q.id)) {
+              errors.push(`${pfx}: duplicate question id "${q.id}" within enabled part`);
+            }
+            partQuestionIds.add(q.id);
+
+            if (globalQuestionIds.has(q.id)) {
+              errors.push(
+                `Duplicate global question id "${q.id}" (${globalQuestionIds.get(q.id)} and ${qfx})`
+              );
+            } else {
+              globalQuestionIds.set(q.id, qfx);
+            }
+          }
+        });
+      });
+    }
+
+    try {
+      const total = ET.buildExamView(exam).meta.totalMarks;
+      if (total === 0) warnings.push("Total marks is 0 for enabled parts");
+    } catch (err) {
+      warnings.push("Could not compute total marks for validation");
+    }
+
+    const enabledParts = ET.getEnabledParts(exam);
+    if (enabledParts.length === 0) {
+      warnings.push("No enabled parts — preview will show title/instructions only");
+    }
+
+    return {
+      ok: errors.length === 0,
+      errors,
+      warnings,
+    };
   };
 })( (window.ExamToolkit = window.ExamToolkit || {}) );

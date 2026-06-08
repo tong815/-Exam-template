@@ -1,0 +1,118 @@
+{
+  "schemaVersion": "1.0",
+  "examId": "generic-math-quiz",
+  "profile": {
+    "grade": "Year 9",
+    "subject": "Mathematics",
+    "courseCode": "",
+    "courseName": "Algebra Basics",
+    "region": "",
+    "language": "en"
+  },
+  "meta": {
+    "schoolName": "[SCHOOL NAME]",
+    "testTitle": "Weekly Math Quiz — Algebra",
+    "studentNameLabel": "Student Name",
+    "dateLabel": "Date",
+    "timeAllowed": "45 minutes",
+    "teacher": "[TEACHER NAME]",
+    "calculatorPolicy": "ALLOWED",
+    "paperSize": "letter"
+  },
+  "instructions": [
+    "Answer all questions.",
+    "Calculators: ALLOWED — confirm policy before the test.",
+    "Show working where indicated."
+  ],
+  "parts": [
+    {
+      "id": "mc-section",
+      "label": "A",
+      "enabled": true,
+      "title": "Multiple Choice",
+      "description": "Circle the best answer.",
+      "defaultQuestionType": "multiple-choice",
+      "defaultMarks": 1,
+      "defaultAnswerSpace": { "type": "blank", "lines": 0 },
+      "pageBreakBefore": false,
+      "questions": [
+        {
+          "id": "quiz-mc-1",
+          "type": "multiple-choice",
+          "marks": 1,
+          "stem": "Simplify: 3x + 2x",
+          "options": [
+            { "key": "A", "text": "5x" },
+            { "key": "B", "text": "6x" },
+            { "key": "C", "text": "5x²" },
+            { "key": "D", "text": "3x²" }
+          ],
+          "answerKey": "A",
+          "tags": ["algebra", "simplify"]
+        },
+        {
+          "id": "quiz-mc-2",
+          "type": "multiple-choice",
+          "marks": 1,
+          "stem": "Solve for x: 2x = 10",
+          "options": [
+            { "key": "A", "text": "x = 4" },
+            { "key": "B", "text": "x = 5" },
+            { "key": "C", "text": "x = 8" },
+            { "key": "D", "text": "x = 20" }
+          ],
+          "answerKey": "B",
+          "tags": ["algebra", "solve"]
+        }
+      ]
+    },
+    {
+      "id": "short-section",
+      "label": "B",
+      "enabled": true,
+      "title": "Short Answer",
+      "description": "Write your answer on the line provided.",
+      "defaultQuestionType": "short-answer",
+      "defaultMarks": 3,
+      "defaultAnswerSpace": { "type": "blank", "lines": 0 },
+      "pageBreakBefore": false,
+      "questions": [
+        {
+          "id": "quiz-sa-1",
+          "type": "short-answer",
+          "marks": 3,
+          "stem": "Expand: (x + 2)(x + 3)",
+          "answerKey": "x² + 5x + 6",
+          "tags": ["algebra", "expand"]
+        },
+        {
+          "id": "quiz-sa-2",
+          "type": "short-answer",
+          "marks": 3,
+          "stem": "Factor: x² − 9",
+          "answerKey": "(x − 3)(x + 3)",
+          "tags": ["algebra", "factor"]
+        }
+      ]
+    }
+  ],
+  "bonus": {
+    "enabled": false,
+    "id": "bonus-1",
+    "label": "B1",
+    "marks": "+2",
+    "stem": "",
+    "answerSpace": { "type": "lines", "lines": 3 },
+    "answerKey": "",
+    "teacherNote": ""
+  },
+  "rubric": {
+    "notes": "Optional teacher rubric — not tied to any regional framework."
+  },
+  "settings": {
+    "showMarkDistribution": true,
+    "showInstructions": true,
+    "showBonus": false,
+    "autoNumberQuestions": true
+  }
+}

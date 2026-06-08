@@ -66,10 +66,11 @@
     });
 
     const view = getBuiltView();
+    const validation = ET.validateExamData(state);
     ET.renderExamPreview(view, examRoot);
 
     if (rerenderEditor && !skipEditorRender) {
-      ET.renderEditor(state, view, editorRoot);
+      ET.renderEditor(state, view, editorRoot, validation);
     }
 
     syncToolbar();
@@ -324,6 +325,9 @@
     window.ExamToolkitAPI = {
       getState: () => ET.deepClone(state),
       getView: getBuiltView,
+      validate: () => ET.validateExamData(state),
+      migrate: (raw) => ET.migrateExamData(raw),
+      normalize: (raw, fb) => ET.normalizeExamData(raw, fb),
       refresh: refreshAll,
       loadProfile,
       exportJson: () => ET.exportExamJson(state),

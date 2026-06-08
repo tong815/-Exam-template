@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0",
+  "examId": "blank-exam",
+  "profile": {
+    "grade": "",
+    "subject": "",
+    "courseCode": "",
+    "courseName": "",
+    "region": "",
+    "language": "en"
+  },
+  "meta": {
+    "schoolName": "",
+    "testTitle": "",
+    "studentNameLabel": "Student Name",
+    "dateLabel": "Date",
+    "timeAllowed": "",
+    "teacher": "",
+    "calculatorPolicy": "ALLOWED",
+    "paperSize": "letter"
+  },
+  "instructions": [
+    "Show all work for full marks unless otherwise stated.",
+    "Calculators: ALLOWED / NOT ALLOWED — confirm policy before the test.",
+    "Write legibly and use proper notation."
+  ],
+  "parts": [
+    {
+      "id": "section-1",
+      "label": "1",
+      "enabled": true,
+      "title": "Section 1",
+      "description": "Answer all questions in this section.",
+      "defaultQuestionType": "short-answer",
+      "defaultMarks": 2,
+      "defaultAnswerSpace": { "type": "blank", "lines": 0 },
+      "pageBreakBefore": false,
+      "questions": [
+        {
+          "id": "q-1",
+          "type": "short-answer",
+          "marks": 2,
+          "stem": "[PLACEHOLDER: Question 1]",
+          "options": [],
+          "answerSpace": { "type": "blank", "lines": 0 },
+          "answerKey": "",
+          "teacherNote": "",
+          "tags": []
+        }
+      ]
+    }
+  ],
+  "bonus": {
+    "enabled": false,
+    "id": "bonus-1",
+    "label": "B1",
+    "marks": "+___",
+    "stem": "",
+    "answerSpace": { "type": "lines", "lines": 3 },
+    "answerKey": "",
+    "teacherNote": ""
+  },
+  "rubric": {},
+  "settings": {
+    "showMarkDistribution": true,
+    "showInstructions": true,
+    "showBonus": false,
+    "autoNumberQuestions": true
+  }
+}

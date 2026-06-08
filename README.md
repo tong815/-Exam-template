@@ -10,23 +10,29 @@
 
 ```text
 Exam-template/
-├─ index.html              # 入口（双击打开，或用 Live Server）
-├─ styles.css              # 屏幕布局 + 打印样式
-├─ src/                    # 通用逻辑（不含年级/科目硬编码）
-│  ├─ app.js               # 入口：状态、控件、事件
-│  ├─ editor.js            # 编辑器 UI
-│  ├─ renderer.js          # 试卷预览渲染
-│  ├─ storage.js           # localStorage、导入/导出、Profile 加载
-│  ├─ schema.js            # 通用 examData 结构与计算
-│  └─ templates.js         # 空白默认模板 + Profile 注册表
-│
-├─ exams/                  # 具体考试内容层（按考试分文件夹）
+├─ index.html
+├─ styles.css
+├─ src/
+│  ├─ app.js
+│  ├─ editor.js
+│  ├─ renderer.js
+│  ├─ storage.js
+│  ├─ schema.js             # schema、migrate、normalize、validate
+│  ├─ templates.js          # 空白模板 + Profile 注册表（无科目内容）
+│  └─ profiles/
+│     └─ g11-functions.js  # G11 fallback + profile 注册
+├─ docs/
+│  └─ schema-v1.md          # 通用 schema 文档
+├─ examples/
+│  ├─ blank-exam.json
+│  ├─ minimal-exam.json
+│  └─ generic-math-quiz.json
+├─ exams/
 │  └─ g11-functions/
 │     ├─ exam-template.md
 │     ├─ answer-key-template.md
 │     ├─ rubric-template.md
-│     └─ exam-data.json    # G11 示例骨架（编辑器可加载）
-│
+│     └─ exam-data.json
 └─ README.md
 ```
 
@@ -37,7 +43,32 @@ Exam-template/
 | **通用模板层** | `src/`, `index.html`, `styles.css` | 数据结构、编辑器、预览、打印、JSON 导入导出 |
 | **考试内容层** | `exams/<profile>/` | 某年级/科目的 markdown 模板、`exam-data.json`、rubric 等 |
 
-通用代码中**不写死** Grade 11、Functions、MCR3U、Ontario、KTCA 等；这些只出现在 `exams/g11-functions/` 等内容文件中。
+通用代码（`src/schema.js`、`src/templates.js` 等）**不写死** Grade 11、Functions、MCR3U、Ontario、KTCA 等；这些只出现在 `exams/` 与 `src/profiles/` 等内容文件中。
+
+---
+
+## Schema hardening v1
+
+稳固项目根基，便于长期扩展：
+
+| 能力 | 位置 | 说明 |
+|:-----|:-----|:-----|
+| **Schema 文档** | `docs/schema-v1.md` | 顶层 / part / question 字段说明、示例链接 |
+| **示例 JSON** | `examples/` | 空白、最小、通用数学小测（无 G11/Ontario） |
+| **migrateExamData** | `src/schema.js` | 旧字段迁移（`solutionLines`、legacy `options` 等） |
+| **normalizeExamData** | `src/schema.js` | 补默认值、标准化结构 |
+| **validateExamData** | `src/schema.js` | 返回 `{ ok, errors, warnings }`，不阻止预览/打印 |
+| **Validation UI** | Editor 顶部 | ✅ / ⚠️ / ❌ 状态，可展开查看列表 |
+| **Renderer 容错** | `src/renderer.js` | 缺字段、未知题型不崩溃 |
+| **Profile 解耦** | `src/profiles/g11-functions.js` | G11 fallback 与注册独立于 `templates.js` |
+
+调试 API：
+
+```javascript
+ExamToolkitAPI.validate()   // 当前试卷校验结果
+ExamToolkitAPI.migrate(raw)   // 仅迁移旧字段
+ExamToolkitAPI.normalize(raw) // 迁移 + 标准化
+```
 
 ---
 
@@ -45,7 +76,7 @@ Exam-template/
 
 ### 方式 A：直接双击（可用）
 
-双击 `index.html`。编辑器与预览可正常使用；**Load Exam Profile** 在无法 `fetch` 本地 JSON 时会自动使用内置 `defaultG11FunctionsExamData` 回退数据。
+双击 `index.html`。编辑器与预览可正常使用；**Load Exam Profile** 在无法 `fetch` 本地 JSON 时会自动使用 `src/profiles/g11-functions.js` 中的内置回退数据。
 
 ### 方式 B：VS Code Live Server（推荐）
 
@@ -201,22 +232,44 @@ cp exams/g11-functions/exam-data.json exams/g12-advanced-functions/exam-data.jso
 
 ### 3. 注册 Profile（可选，便于工具栏加载）
 
-在 `src/templates.js` 的 `EXAM_PROFILES` 数组追加：
+**步骤：**
+
+1. 新建 `exams/<profile>/exam-data.json`
+2. 若需 `file://` 回退，新建 `src/profiles/<profile>.js`
+3. 在 profile 文件中调用 `ET.registerProfile({ ... })`
+4. 在 `index.html` 中于 `templates.js` 之后加载该 profile 脚本
+
+`src/profiles/g12-advanced-functions.js` 示例：
 
 ```javascript
-{
-  id: "g12-advanced-functions",
-  label: "G12 Advanced Functions",
-  dataPath: "exams/g12-advanced-functions/exam-data.json",
-  getData: function () {
-    return ET.normalizeExamData(/* 内置 fallback 对象 */, ET.createBlankExam());
-  },
-}
+(function (ET) {
+  ET.defaultG12ExamData = function () {
+    return { /* 完整 examData 对象 */ };
+  };
+  ET.registerProfile({
+    id: "g12-advanced-functions",
+    label: "G12 Advanced Functions",
+    dataPath: "exams/g12-advanced-functions/exam-data.json",
+    getData: function () { return ET.defaultG12ExamData(); },
+  });
+})(window.ExamToolkit);
 ```
+
+`src/templates.js` 只保留 `registerProfile` 与 Blank Template，**不要**把科目内容写进去。
 
 也可跳过注册，直接 **Import JSON** 载入 `exam-data.json`。
 
-### 4. 工作流建议
+### 4. 参考 examples/
+
+| 文件 | 用途 |
+|:-----|:-----|
+| `examples/blank-exam.json` | 通用空白骨架 |
+| `examples/minimal-exam.json` | 最小可渲染考试（1 题） |
+| `examples/generic-math-quiz.json` | 通用数学小测（无地区/年级绑定） |
+
+字段说明见 `docs/schema-v1.md`。
+
+### 5. 工作流建议
 
 1. 在编辑器中搭好骨架（题量、分值、答题行数）
 2. **Export JSON**
@@ -254,4 +307,4 @@ Markdown 模板与 Ontario KTCA rubric 说明见 `exams/g11-functions/`。
 
 通用框架可自由修改复用；`exams/` 下具体题目内容版权归出题教师所有。
 
-*Last updated: Generic Exam Template — schema v1.0*
+*Last updated: Schema hardening v1 — exam schema v1.0*

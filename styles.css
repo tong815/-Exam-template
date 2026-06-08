@@ -202,6 +202,95 @@ body {
   color: #1e293b;
 }
 
+/* Validation summary */
+.validation-summary {
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-editor-border);
+  background: #fff;
+  font-size: 0.8125rem;
+}
+
+.validation-summary--ok {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.validation-summary--warn {
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+
+.validation-summary--error {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.validation-summary__head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.65rem;
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+}
+
+.validation-summary__head::-webkit-details-marker {
+  display: none;
+}
+
+.validation-summary__icon {
+  font-size: 1rem;
+}
+
+.validation-summary__status {
+  margin-left: auto;
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.validation-summary__body {
+  padding: 0 0.65rem 0.55rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.validation-summary__label {
+  margin: 0.4rem 0 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+.validation-summary__list {
+  margin: 0.2rem 0 0.35rem;
+  padding-left: 1.1rem;
+  font-size: 0.75rem;
+}
+
+.validation-summary__list--errors {
+  color: #991b1b;
+}
+
+.validation-summary__list--warnings {
+  color: #92400e;
+}
+
+.validation-summary__hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.7rem;
+  color: var(--color-muted);
+}
+
+.question-unsupported {
+  margin: 0.35rem 0;
+  font-size: 0.9em;
+  color: var(--color-muted);
+}
+
 .editor-section {
   margin-bottom: 1.25rem;
   padding-bottom: 1rem;

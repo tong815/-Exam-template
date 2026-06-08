@@ -140,15 +140,60 @@
       </div>`;
   };
 
-  ET.renderEditor = function (exam, view, rootEl) {
+  ET.renderValidationSummary = function (validation) {
+    const v = validation || { ok: true, errors: [], warnings: [] };
+    const hasErrors = v.errors.length > 0;
+    const hasWarnings = v.warnings.length > 0;
+    const statusClass = hasErrors
+      ? "validation-summary--error"
+      : hasWarnings
+        ? "validation-summary--warn"
+        : "validation-summary--ok";
+    const statusIcon = hasErrors ? "❌" : hasWarnings ? "⚠️" : "✅";
+    const statusText = hasErrors
+      ? `${v.errors.length} error(s), ${v.warnings.length} warning(s)`
+      : hasWarnings
+        ? `Schema valid with ${v.warnings.length} warning(s)`
+        : "Schema valid";
+
+    const errorList =
+      v.errors.length > 0
+        ? `<ul class="validation-summary__list validation-summary__list--errors">${v.errors.map((e) => `<li>${ET.escapeHtml(e)}</li>`).join("")}</ul>`
+        : "";
+    const warnList =
+      v.warnings.length > 0
+        ? `<ul class="validation-summary__list validation-summary__list--warnings">${v.warnings.map((w) => `<li>${ET.escapeHtml(w)}</li>`).join("")}</ul>`
+        : "";
+
+    return `
+      <details class="validation-summary ${statusClass}" open>
+        <summary class="validation-summary__head">
+          <span class="validation-summary__icon">${statusIcon}</span>
+          <span class="validation-summary__title">Validation</span>
+          <span class="validation-summary__status">${ET.escapeHtml(statusText)}</span>
+        </summary>
+        <div class="validation-summary__body">
+          ${hasErrors ? `<p class="validation-summary__label">Errors</p>${errorList}` : ""}
+          ${hasWarnings ? `<p class="validation-summary__label">Warnings</p>${warnList}` : ""}
+          ${!hasErrors && !hasWarnings ? `<p class="validation-summary__hint">No issues detected.</p>` : ""}
+          ${hasErrors ? `<p class="validation-summary__hint">Preview and print remain available; fix errors before exporting final exams.</p>` : ""}
+        </div>
+      </details>`;
+  };
+
+  ET.renderEditor = function (exam, view, rootEl, validation) {
     if (!rootEl) return;
     const numberMap = ET.assignQuestionNumbers(exam);
-    const m = exam.meta;
-    const p = exam.profile;
+    const m = exam.meta || {};
+    const p = exam.profile || {};
 
-    const partsHtml = exam.parts.map((part, i) => ET.renderPartEditor(i, part, numberMap, view)).join("");
+    const partsHtml = (exam.parts || [])
+      .map((part, i) => ET.renderPartEditor(i, part, numberMap, view))
+      .join("");
 
     rootEl.innerHTML = `
+      ${ET.renderValidationSummary(validation)}
+
       <section class="editor-section">
         <h2 class="editor-section__title">Exam Profile</h2>
         ${ET.fieldText("Exam ID", "examId", exam.examId)}
